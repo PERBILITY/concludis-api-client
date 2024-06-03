@@ -20,12 +20,11 @@ sources and transferring them to the normalized structure.
 
 ## Installation
 
-- add this library to your project via composer
-- create a new database in your dbms
-- copy config/config.sample.php to config/config.php
-  - modify your database credentials 
-  - modify your ATS source credentials and URL
+- Add this library to your project via composer
+- Create a new database in your dbms
+- Copy config/config.sample.php to config/config.php
+  - Modify your database credentials 
+  - Modify your ATS source credentials and URL
 - Execute cli/install.php to initialize the magic
-  - this will create all the required caching tables in your database. Please be patient, the library contains geodata for 86 countries, which will be initially imported in this step.
+  - This will create all the required caching tables in your database. Please be patient, the library contains geodata for 86 countries, which will be initially imported in this step.
 - Execute cli/pull-projects.php to sync all the job advertisements from your ATS
-
