@@ -22,7 +22,12 @@ use RuntimeException;
 
 class Client extends AbstractClient {
 
-
+    /**
+     * @param  string  $endpoint
+     * @param  array  $data
+     * @param  string  $method
+     * @return ApiResponse
+     */
     public function call(string $endpoint, array $data, string $method): ApiResponse {
 
         if($this->source === null) {
@@ -58,16 +63,19 @@ class Client extends AbstractClient {
         if($method === 'POST') {
             curl_setopt($ch, CURLOPT_POST, 1);
             if( !empty($data)) {
-                curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data, JSON_THROW_ON_ERROR));
+                try {
+                    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data, JSON_THROW_ON_ERROR));
+                } catch (\JsonException) {}
             }
         }
-
-
 
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
 
         if(!$this->source->ssl_verify_peer) {
-            /** @noinspection CurlSslServerSpoofingInspection */
+            /**
+             * @noinspection CurlSslServerSpoofingInspection
+             * @noinspection UnknownInspectionInspection
+             */
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         }
 
@@ -132,6 +140,14 @@ class Client extends AbstractClient {
         return new ApiResponse(null, $error);
     }
 
+    /**
+     * @param  Source  $source
+     * @param  int  $project_id
+     * @param  ProjectSaveHandler  $saveHandler
+     * @param  bool  $cli
+     * @return void
+     * @throws Exception
+     */
     public function pullProject(Source $source, int $project_id, ProjectSaveHandler $saveHandler, bool $cli): void {
 
         $pdo = PDO::getInstance();
@@ -167,18 +183,6 @@ class Client extends AbstractClient {
 
             $pdo->commit();
 
-        } catch (HttpException $e) {
-            $pdo->rollback();
-            if($cli) {
-                CliUtil::output('');
-                CliUtil::output('uups, API call failed: ' . $e->getMessage());
-                CliUtil::output('------------------------------------');
-                CliUtil::output('');
-                CliUtil::output($e->getTraceAsString());
-                CliUtil::output('Response body');
-                CliUtil::output($e->response_body);
-                return;
-            }
         } catch (Exception $e) {
             $pdo->rollback();
             if($cli) {
@@ -190,7 +194,6 @@ class Client extends AbstractClient {
                 $previous = $e->getPrevious();
                 if($previous) {
                     CliUtil::output($previous->getTraceAsString());
-
                 }
                 return;
             }
@@ -198,6 +201,12 @@ class Client extends AbstractClient {
 
     }
 
+    /**
+     * @param  Source  $source
+     * @param  ProjectSaveHandler  $saveHandler
+     * @param  bool  $cli
+     * @return void
+     */
     public function pullProjects(Source $source, ProjectSaveHandler $saveHandler, bool $cli): void {
 
         $pdo = PDO::getInstance();
@@ -252,18 +261,6 @@ class Client extends AbstractClient {
 
             $pdo->commit();
 
-        } catch (HttpException $e) {
-            $pdo->rollback();
-            if($cli) {
-                CliUtil::output('');
-                CliUtil::output('uups, API call failed: ' . $e->getMessage());
-                CliUtil::output('------------------------------------');
-                CliUtil::output('');
-                CliUtil::output($e->getTraceAsString());
-                CliUtil::output('Response body');
-                CliUtil::output($e->response_body);
-                return;
-            }
         } catch (Exception $e) {
             $pdo->rollback();
             if($cli) {
@@ -275,7 +272,6 @@ class Client extends AbstractClient {
                 $previous = $e->getPrevious();
                 if($previous) {
                     CliUtil::output($previous->getTraceAsString());
-
                 }
                 return;
             }
