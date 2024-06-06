@@ -11,6 +11,7 @@ use Concludis\ApiClient\Resources\JobadContainer;
 use Concludis\ApiClient\Resources\Location;
 use Concludis\ApiClient\Resources\Place;
 use Concludis\ApiClient\Resources\Project;
+use Concludis\ApiClient\Resources\Schedule;
 use Concludis\ApiClient\Util\ArrayUtil;
 use DateTime;
 use Exception;
@@ -202,10 +203,11 @@ class ProjectRepository {
 
     /**
      * @param int $count
+     * @param bool $count_only
      * @return Project[]
      * @throws Exception
      */
-    public function fetch(int &$count = -1): array {
+    public function fetch(int &$count = -1, bool $count_only = false): array {
 
         $query_parts = $this->createQueryParts();
         $query = $this->prepareQueryParts($query_parts);
@@ -243,6 +245,10 @@ class ProjectRepository {
             if($res_count !== false) {
                 $count = $res_count['cnt'];
             }
+        }
+
+        if ($count_only) {
+            return [];
         }
 
         $query_select = 'SELECT `project`.`source_id`, `project`.`project_id`, project.data ' .
@@ -1099,6 +1105,33 @@ class ProjectRepository {
 
             if (!empty($tmp_filter)) {
 
+                // apply merge mapping
+                if (!empty($source_in)) {
+                    foreach($source_in as $source_id) {
+                        $map_k_array = [];
+                        foreach (Schedule::$merge_map as $map_k => $map_v_array) {
+                            try {
+                                $local_v_array = ScheduleRepository::fetchLocalIdsByGlobalIds($map_v_array, $source_id);
+                                if(!empty(array_intersect($tmp_filter, $local_v_array))) {
+                                    $map_k_array[] = $map_k;
+                                }
+                            } catch (Exception) {
+                                continue;
+                            }
+                        }
+
+                        try {
+                            $local_k_array = ScheduleRepository::fetchLocalIdsByGlobalIds($map_k_array, $source_id);
+                            foreach ($local_k_array as $local_k) {
+                                $tmp_filter[] = $local_k;
+                            }
+                        } catch (Exception) {
+                            continue;
+                        }
+                    }
+                    $tmp_filter = array_unique($tmp_filter);
+                }
+
                 $find_ids = array_values(array_diff($tmp_filter, ['-1']));
                 $find_others = in_array('-1', $tmp_filter, true);
 
@@ -1142,6 +1175,14 @@ class ProjectRepository {
             }
 
             if (!empty($tmp_filter)) {
+
+                // apply merge mapping
+                foreach (Schedule::$merge_map as $map_k => $map_v_array) {
+                    if(!empty(array_intersect($tmp_filter, $map_v_array))) {
+                        $tmp_filter[] = $map_k;
+                    }
+                }
+                $tmp_filter = array_unique($tmp_filter);
 
                 $find_ids = array_values(array_diff($tmp_filter, [-1]));
                 $find_others = in_array(-1, $tmp_filter, true);
@@ -1800,6 +1841,7 @@ class ProjectRepository {
         COUNT(DISTINCT ' . $count_key . ') AS `cnt`, 
         `local_schedule`.`schedule_id`,
         `local_schedule`.`source_id`,
+        `local_schedule`.`global_schedule_id`,
         COALESCE((
             SELECT `translation` FROM `'.CONCLUDIS_TABLE_I18N.'` 
             WHERE `model` = "local_schedule" AND `field` = "name" 
@@ -1822,7 +1864,11 @@ class ProjectRepository {
         GROUP BY `schedule`.`schedule_id`, `schedule`.`source_id` 
         ORDER BY `cnt` DESC';
 
-        return PDO::getInstance()->select($query_select, $query['ph']);
+        return self::mergeQuantityResults(
+            PDO::getInstance()->select($query_select, $query['ph']),
+            Schedule::$merge_map,
+            'global_schedule_id'
+        );
     }
 
     /**
@@ -1881,7 +1927,48 @@ class ProjectRepository {
         GROUP BY `local_schedule`.`global_schedule_id` 
         ORDER BY `cnt` DESC';
 
-        return PDO::getInstance()->select($query_select, $query['ph']);
+        return self::mergeQuantityResults(
+            PDO::getInstance()->select($query_select, $query['ph']),
+            Schedule::$merge_map,
+            'id'
+        );
+    }
+
+
+    private static function mergeQuantityResults(array $data, array $merge_mapping, string $global_id_key = 'global_id'): array {
+
+        if(empty($merge_mapping)) {
+            return $data;
+        }
+
+        $merge_into_tmp = [];
+        $merged_data = [];
+
+        foreach($data as $d) {
+            $global_schedule_id = $d[$global_id_key] ?? '_undefined';
+            if(array_key_exists($global_schedule_id, $merge_mapping)) {
+                foreach($merge_mapping[$global_schedule_id] as $merge_into_global_schedule_id) {
+                    $merge_into_tmp[] = [
+                        'merge_from_global_id' => $global_schedule_id,
+                        'merge_into_global_id' => $merge_into_global_schedule_id,
+                        'cnt' => $d['cnt']
+                    ];
+                }
+            } else {
+                $merged_data[] = $d;
+            }
+        }
+
+        foreach($merge_into_tmp as $m) {
+            foreach($merged_data as &$d) {
+                if($m['merge_into_global_id'] === $d[$global_id_key]) {
+                    $d['cnt'] += $m['cnt'];
+                }
+            }
+            unset($d);
+        }
+
+        return $merged_data;
     }
 
     /**
@@ -2679,6 +2766,30 @@ class ProjectRepository {
                 ]);
             }
         }
+    }
+
+    /**
+     * @param Location $location
+     * @return void
+     * @throws Exception
+     */
+    public static function updateProjectLocationsLatLon(Location $location): void {
+
+        $pdo = PDO::getInstance();
+
+        $sql = 'UPDATE `'.CONCLUDIS_TABLE_PROJECT_LOCATION.'` 
+        SET `map_data` = JSON_SET(`map_data`,
+            "$.coordinates[0]", :lon,
+            "$.coordinates[1]", :lat
+        ) WHERE `source_id` = :source_id AND `location_id` = :location_id';
+
+        $pdo->update($sql, [
+            ':lon' => $location->lon,
+            ':lat' => $location->lat,
+            ':source_id' => $location->source_id,
+            ':location_id' => $location->id,
+        ]);
+
     }
 
     /**

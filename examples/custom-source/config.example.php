@@ -13,7 +13,7 @@ Baseconfig::addSource([
     'baseurl' => 'base_url',
     'username' => 'username',
     'password' => 'userpass',
-    'api' => (new HelixApiClient())
+    'api' => (new CustomApiClient())
 ]);
 
 Baseconfig::init();

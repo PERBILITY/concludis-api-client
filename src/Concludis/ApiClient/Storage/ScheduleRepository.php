@@ -209,4 +209,31 @@ class ScheduleRepository {
         return (string)$res['name'];
     }
 
+    /**
+     * @param array $global_ids
+     * @param int $source_id
+     * @return array
+     * @throws Exception
+     */
+    public static function fetchLocalIdsByGlobalIds(array $global_ids, int $source_id): array {
+
+        if(empty($global_ids)) {
+            return [];
+        }
+
+        $pdo = PDO::getInstance();
+
+        $sql = 'SELECT SHA1(CONCAT(`source_id` , \'-\', `schedule_id`)) as `local_id`
+        FROM `'.CONCLUDIS_TABLE_LOCAL_SCHEDULE.'` 
+        WHERE `global_schedule_id` IN(:global_ids) 
+        AND `source_id` = :source_id';
+
+        return array_map(static function(array $item) {
+            return $item['local_id'];
+        },$pdo->select($sql,[
+            ':global_ids' => $global_ids,
+            ':source_id' => $source_id,
+        ]));
+    }
+
 }

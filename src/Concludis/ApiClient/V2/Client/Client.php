@@ -115,7 +115,10 @@ class Client extends AbstractClient {
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
         if(!$source->ssl_verify_peer) {
-            /** @noinspection CurlSslServerSpoofingInspection */
+            /**
+             * @noinspection CurlSslServerSpoofingInspection
+             * @noinspection UnknownInspectionInspection
+             */
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         }
 

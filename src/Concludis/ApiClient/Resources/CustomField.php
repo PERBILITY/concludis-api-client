@@ -44,7 +44,7 @@ class CustomField {
     /**
      * @var mixed
      */
-    public $value;
+    public mixed $value;
 
     public function __construct(array $data = []) {
 

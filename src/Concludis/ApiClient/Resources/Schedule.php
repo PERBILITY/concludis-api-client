@@ -7,6 +7,10 @@ use Exception;
 
 class Schedule extends Element {
 
+    public static array $merge_map = [
+        12 => [1,8]
+    ];
+
     use TranslatableTrait;
 
     public function __construct(array $data = []) {

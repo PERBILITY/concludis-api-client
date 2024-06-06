@@ -11,7 +11,7 @@ namespace Concludis\ApiClient\Config;
 use Concludis\ApiClient\Storage\SetupRepository;
 use Exception;
 use JsonException;
-use \stdClass;
+use stdClass;
 
 class Setupitem {
 
@@ -21,9 +21,9 @@ class Setupitem {
     public string $key = '';
 
     /**
-     * @var stdClass|null
+     * @var mixed|null
      */
-    public $value;
+    public mixed $value;
 
     public function __construct(array $data = []) {
 

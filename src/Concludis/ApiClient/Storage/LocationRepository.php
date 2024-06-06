@@ -18,6 +18,8 @@ class LocationRepository {
      */
     public static function save(Location $location): bool {
 
+        self::fulfillLatLonFromCache($location);
+
         if (self::exists($location)) {
             return self::update($location);
         }
@@ -41,31 +43,33 @@ class LocationRepository {
         `country_code` = :country_code, 
         `postal_code` = :postal_code, 
         `locality` = :locality, 
+        `address` = :address, 
         `external_id` = :external_id, 
         `region_id` = :region_id, 
         `custom_text1` = :custom1, 
         `custom_text2` = :custom2, 
         `custom_text3` = :custom3, 
         `lat` = :lat, 
-        `lon` = :lon';
+        `lon` = :lon, 
+        `geocoding_source` = :geocoding_source ';
 
-        $ph = [
+        if($pdo->insert($sql, [
             ':source_id' => $location->source_id,
             ':location_id' => $location->id,
             ':name' => $location->name,
             ':country_code' => $location->country_code,
             ':postal_code' => $location->postal_code,
             ':locality' => $location->locality,
+            ':address' => $location->address,
             ':external_id' => $location->external_id,
             ':region_id' => $location->region?->id,
             ':custom1' => $location->custom1,
             ':custom2' => $location->custom2,
             ':custom3' => $location->custom3,
             ':lat' => $location->lat,
-            ':lon' => $location->lon
-        ];
-
-        if($pdo->insert($sql, $ph)) {
+            ':lon' => $location->lon,
+            ':geocoding_source' => $location->geocoding_source
+        ])) {
 
             if($location->region !== null) {
                 RegionRepository::save($location->region);
@@ -89,32 +93,34 @@ class LocationRepository {
         `country_code` = :country_code, 
         `postal_code` = :postal_code, 
         `locality` = :locality, 
+        `address` = :address, 
         `external_id` = :external_id, 
         `region_id` = :region_id, 
         `custom_text1` = :custom1, 
         `custom_text2` = :custom2, 
         `custom_text3` = :custom3 , 
         `lat` = :lat, 
-        `lon` = :lon                                    
+        `lon` = :lon, 
+        `geocoding_source` = :geocoding_source                                    
         WHERE `source_id` = :source_id AND `location_id` = :location_id';
 
-        $ph = [
+        if($pdo->update($sql, [
             ':source_id' => $location->source_id,
             ':location_id' => $location->id,
             ':name' => $location->name,
             ':country_code' => $location->country_code,
             ':postal_code' => $location->postal_code,
             ':locality' => $location->locality,
+            ':address' => $location->address,
             ':external_id' => $location->external_id,
             ':region_id' => $location->region?->id,
             ':custom1' => $location->custom1,
             ':custom2' => $location->custom2,
             ':custom3' => $location->custom3,
             ':lat' => $location->lat,
-            ':lon' => $location->lon
-        ];
-
-        if($pdo->update($sql, $ph)) {
+            ':lon' => $location->lon,
+            ':geocoding_source' => $location->geocoding_source
+        ])) {
 
             if($location->region !== null) {
                 RegionRepository::save($location->region);
@@ -236,4 +242,95 @@ class LocationRepository {
         }
     }
 
+    /**
+     * @param int $limit
+     * @return Location[]
+     * @throws Exception
+     */
+    public static function fetchGeocodableLocationsStack(int $limit = 50): array  {
+
+        $pdo = PDO::getInstance();
+
+        $sql = 'SELECT *  FROM `'.CONCLUDIS_TABLE_LOCAL_LOCATION.'` WHERE 
+        ( (`lat` IS NULL AND `lon` IS NULL) OR `geocoding_source` = ' . Location::GEOCODING_SOURCE_FALLBACK . ')
+        AND `country_code` != ""
+        AND `postal_code` != ""
+        AND `locality` != ""
+        AND `address` != ""
+        
+        AND NOT EXISTS(
+        SELECT 1 FROM `'.CONCLUDIS_TABLE_CACHE.'` WHERE `key` = CONCAT("geocode:", SHA1(CONCAT(`country_code`, "::", `postal_code`, "::", `locality`, "::", `address`)))
+        ) LIMIT ' . $limit;
+
+        $res =  $pdo->select($sql);
+
+        return array_map(static function(array $data) {
+            return new Location($data);
+        }, $res);
+    }
+
+    /**
+     * @param Location $location
+     * @return void
+     */
+    public static function fulfillLatLonFromCache(Location $location): void  {
+
+        $has_geocode = $location->lat !== null && $location->lon !== null;
+        $source_fallback = $location->geocoding_source === Location::GEOCODING_SOURCE_FALLBACK;
+
+        if($has_geocode && !$source_fallback) {
+            return;
+        }
+
+        if(!empty($location->country_code)
+            && !empty($location->postal_code)
+            && !empty($location->locality)
+            && !empty($location->address)) {
+
+            $key = 'geocode:' . sha1(
+            $location->country_code . '::' .
+                $location->postal_code . '::' .
+                $location->locality . '::' .
+                $location->address
+            );
+
+            try {
+                $data = CacheRepository::fetch($key);
+                $result = $data['response'] ?? null;
+                if(is_array($result)) {
+                    $lat = $result['lat'] ?? null;
+                    $lon = $result['lon'] ?? null;
+                    if($lat !== null && $lon !== null) {
+                        $location->lat = (float)$lat;
+                        $location->lon = (float)$lon;
+                        $location->geocoding_source = Location::GEOCODING_SOURCE_GOOGLE;
+                        return;
+                    }
+                }
+            } catch (Exception) {
+                // do nothing on read error
+            }
+        }
+
+        if(!empty($location->country_code)
+            && !empty($location->postal_code)
+            && !empty($location->locality)) {
+            try {
+                $place = PlaceRepository::factory()
+                    ->addFilter(PlaceRepository::FILTER_TYPE_COUNTRY_CODE, $location->country_code)
+                    ->addFilter(PlaceRepository::FILTER_TYPE_POSTAL_CODE, $location->postal_code)
+                    ->addFilter(PlaceRepository::FILTER_TYPE_PLACE_NAME, $location->locality)
+                    ->fetchOne();
+
+                if ($place !== null) {
+                    $location->lat = $place->lat;
+                    $location->lon = $place->lon;
+                    $location->geocoding_source = Location::GEOCODING_SOURCE_FALLBACK;
+                }
+            } catch (Exception) {
+                // do nothing on read error
+            }
+        }
+
+    }
 }

@@ -49,7 +49,12 @@ class Client extends AbstractClient {
             'Authorization: Basic '. base64_encode($this->source->username . ':' . $this->source->password)
         );
 
-
+    /**
+     * @param string $endpoint
+     * @param array $data
+     * @param string $method
+     * @return ApiResponse
+     */
         $ch = curl_init($url);
 
         $proxy = getenv('HTTPS_PROXY');

@@ -39,7 +39,7 @@ class CliUtil {
             $status_bar .= '=';
         }
 
-        $disp = number_format($perc * 100, 0);
+        $disp = number_format($perc * 100);
 
         $status_bar .= "] $disp% $done/$total";
 

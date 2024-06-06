@@ -9,47 +9,51 @@
 namespace Concludis\ApiClient\Resources;
 
 
+use Concludis\ApiClient\Storage\LocationRepository;
+use Concludis\ApiClient\Storage\RegionRepository;
+use Exception;
+
 class Location {
 
     /**
      * @var string
      */
-    public $source_id;
+    public string $source_id;
 
     /**
      * @var int
      */
-    public $id;
+    public int $id;
 
     /**
      * @var string
      */
-    public $external_id;
+    public string $external_id = '';
 
     /**
      * @var string
      */
-    public $name;
+    public string $name = '';
 
     /**
      * @var string
      */
-    public $country_code;
+    public string $country_code = '';
 
     /**
      * @var string
      */
-    public $postal_code;
+    public string $postal_code = '';
 
     /**
      * @var string
      */
-    public $locality;
+    public string $locality = '';
 
     /**
      * @var string
      */
-    public $address;
+    public string $address = '';
 
     /**
      * @var string
@@ -67,32 +71,39 @@ class Location {
     public string $custom3 = '';
 
     /**
-     * @var float
+     * @var float|null
      */
-    public $lat;
+    public ?float $lat = null;
 
     /**
-     * @var float
+     * @var float|null
      */
-    public $lon;
+    public ?float $lon = null;
+
+    public int $geocoding_source = 0;
 
     /**
-     * @var Element
+     * @var Element|null
      */
-    public $region;
+    public ?Element $region = null;
 
+
+    public const GEOCODING_SOURCE_ORIGIN = 0;
+    public const GEOCODING_SOURCE_GOOGLE = 1;
+    public const GEOCODING_SOURCE_FALLBACK = 2;
 
     public function __construct(array $data = []) {
 
-        if(array_key_exists('source_id', $data)) {
-            $this->source_id = (string)$data['source_id'];
-        }
+        $this->source_id = (string)($data['source_id'] ?? '');
+
         if(array_key_exists('id', $data)) {
             $this->id = (int)$data['id'];
+        } else if(array_key_exists('location_id', $data)) {
+            $this->id = (int)$data['location_id'];
         }
-        if(array_key_exists('external_id', $data) && !empty($data['external_id'])) {
-            $this->external_id = (string)$data['external_id'];
-        }
+
+        $this->external_id = (string)($data['external_id'] ?? '');
+
         if(array_key_exists('name', $data)) {
             $this->name = (string)$data['name'];
         }
@@ -110,12 +121,18 @@ class Location {
         }
         if(array_key_exists('custom1', $data)) {
             $this->custom1 = (string)$data['custom1'];
+        } else if(array_key_exists('custom_text1', $data)) {
+            $this->custom1 = (string)$data['custom_text1'];
         }
         if(array_key_exists('custom2', $data)) {
             $this->custom2 = (string)$data['custom2'];
+        } else if(array_key_exists('custom_text2', $data)) {
+            $this->custom2 = (string)$data['custom_text2'];
         }
         if(array_key_exists('custom3', $data)) {
             $this->custom3 = (string)$data['custom3'];
+        } else if(array_key_exists('custom_text3', $data)) {
+            $this->custom3 = (string)$data['custom_text3'];
         }
         if(array_key_exists('lat', $data)
             && $data['lat'] !== null
@@ -134,10 +151,18 @@ class Location {
         if(array_key_exists('region', $data)) {
             if($data['region'] instanceof Element){
                 $this->region = $data['region'];
-
             }
+        } else if(array_key_exists('region_id', $data) && $data['region_id'] > 0) {
+            try {
+                $this->region = RegionRepository::fetchById($this->source_id, $data['region_id']);
+            } catch (Exception) {}
         }
 
+        if(array_key_exists('geocoding_source', $data)) {
+            $this->geocoding_source = (int)$data['geocoding_source'];
+        }
+
+        LocationRepository::fulfillLatLonFromCache($this);
     }
 
     public function distanceTo(float $lat, float $lon): ?float {

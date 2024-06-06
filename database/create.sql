@@ -158,19 +158,21 @@ CREATE TABLE IF NOT EXISTS `tbl_local_group`
 
 CREATE TABLE IF NOT EXISTS `tbl_local_location`
 (
-    `source_id`    varchar(255)     NOT NULL,
-    `location_id`  int(10) unsigned NOT NULL,
-    `name`         varchar(255)     DEFAULT NULL,
-    `country_code` char(2)          NOT NULL,
-    `postal_code`  varchar(255)     NOT NULL,
-    `locality`     varchar(255)     NOT NULL,
-    `external_id`  varchar(255)     DEFAULT NULL,
-    `region_id`    int(10) unsigned DEFAULT NULL,
-    `custom_text1` varchar(255)     NOT NULL,
-    `custom_text2` varchar(255)     NOT NULL,
-    `custom_text3` varchar(255)     NOT NULL,
-    `lat`          decimal(7, 5)    DEFAULT NULL,
-    `lon`          decimal(8, 5)    DEFAULT NULL,
+    `source_id`         varchar(255)     NOT NULL,
+    `location_id`       int(10) unsigned NOT NULL,
+    `name`              varchar(255)     DEFAULT NULL,
+    `country_code`      char(2)          NOT NULL,
+    `postal_code`       varchar(255)     NOT NULL,
+    `locality`          varchar(255)     NOT NULL,
+    `address`           varchar(255)     NOT NULL,
+    `external_id`       varchar(255)     DEFAULT NULL,
+    `region_id`         int(10) unsigned DEFAULT NULL,
+    `custom_text1`      varchar(255)     NOT NULL,
+    `custom_text2`      varchar(255)     NOT NULL,
+    `custom_text3`      varchar(255)     NOT NULL,
+    `lat`               decimal(7, 5)    DEFAULT NULL,
+    `lon`               decimal(8, 5)    DEFAULT NULL,
+    `geocoding_source`  TINYINT UNSIGNED NOT NULL DEFAULT '0',
     PRIMARY KEY (`source_id`, `location_id`),
     KEY `idx_geo` (`country_code`, `postal_code`),
     KEY `idx_region` (`region_id`),
@@ -232,12 +234,14 @@ CREATE TABLE IF NOT EXISTS `tbl_project`
     `source_id`  varchar(255)     NOT NULL,
     `project_id` int(11) unsigned NOT NULL,
     `data`       longtext         NOT NULL,
-    `date_from`  date DEFAULT NULL,
+    `date_from_internal` DATE NULL DEFAULT NULL,
+    `date_from_public`  DATE NULL DEFAULT NULL,
     `published_internal` tinyint(1) unsigned NOT NULL DEFAULT '0',
     `published_public` tinyint(1) unsigned NOT NULL DEFAULT '1',
     `lastupdate` datetime         NOT NULL,
     PRIMARY KEY (`source_id`, `project_id`),
-    KEY `idx_date_from` (`date_from`),
+    KEY `idx_date_from_public` (`date_from_public`),
+    KEY `idx_date_from_internal` (`date_from_internal`),
     KEY `idx_published_internal` (`published_internal`),
     KEY `idx_published_public` (`published_public`)
 ) ENGINE = InnoDB
@@ -380,8 +384,16 @@ CREATE TABLE IF NOT EXISTS `tbl_setup`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS `tbl_cache` (
+    `key` varchar(50) NOT NULL,
+    `data` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+    PRIMARY KEY (`key`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET=utf8mb4
+  COLLATE = utf8mb4_unicode_ci;
+
 INSERT INTO `tbl_setup` (`key`, `value`)
-VALUES ('db_version', '{"revision":14}');
+VALUES ('db_version', '{"revision":17}');
 
 /*!40103 SET TIME_ZONE = IFNULL(@OLD_TIME_ZONE, 'system') */;
 /*!40101 SET SQL_MODE = IFNULL(@OLD_SQL_MODE, '') */;

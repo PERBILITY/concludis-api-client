@@ -27,7 +27,7 @@ class JobadContainer {
     public int $datafield_id;
 
     /**
-     * @var string|null
+     * @var string
      */
     public string $locale = 'de_DE';
 

@@ -90,7 +90,8 @@ class InstallService {
             '`tbl_project_group`' => '`' . $prefix . 'project_group`',
             '`tbl_project_board`' => '`' . $prefix . 'project_board`',
             '`tbl_setup`' => '`' . $prefix . 'setup`',
-            '`tbl_i18n`' => '`' . $prefix . 'i18n`'
+            '`tbl_i18n`' => '`' . $prefix . 'i18n`',
+            '`tbl_cache`' => '`' . $prefix . 'cache`'
         ];
     }
 

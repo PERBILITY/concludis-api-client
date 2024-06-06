@@ -12,6 +12,31 @@ use Exception;
 class RegionRepository {
 
     /**
+     * @param string $source_id
+     * @param int $region_id
+     * @return Element|null
+     * @throws Exception
+     */
+    public static function fetchById(string $source_id, int $region_id): ?Element {
+
+        $pdo = PDO::getInstance();
+
+        $sql = 'SELECT `source_id`, `region_id` AS `id`, `name` FROM `'.CONCLUDIS_TABLE_LOCAL_REGION.'` WHERE 
+        `source_id` = :source_id AND `region_id` = :region_id';
+
+        $res = $pdo->selectOne($sql, [
+            ':source_id' => $source_id,
+            ':region_id' => $region_id
+        ]);
+
+        if(!is_array($res)) {
+            return null;
+        }
+
+        return new Element($res);
+    }
+
+    /**
      * @param Element $element
      * @return bool
      * @throws Exception

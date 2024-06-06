@@ -45,6 +45,9 @@ class Baseconfig {
     public static string $default_locale = 'de_DE';
 
 
+    public static ?string $google_maps_api_key = null;
+
+
     public static function init(): void {
 
         if(!defined('CONCLUDIS_PATH')) {
@@ -160,6 +163,10 @@ class Baseconfig {
 
         if(!defined('CONCLUDIS_TABLE_I18N')) {
             define('CONCLUDIS_TABLE_I18N', self::$db_prefix . 'i18n');
+        }
+
+        if(!defined('CONCLUDIS_TABLE_CACHE')) {
+            define('CONCLUDIS_TABLE_CACHE', self::$db_prefix . 'cache');
         }
 
     }

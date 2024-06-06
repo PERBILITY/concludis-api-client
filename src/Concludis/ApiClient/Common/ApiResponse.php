@@ -49,7 +49,7 @@ class ApiResponse {
             if($this->error->exception instanceof ApiRuntimeException) {
                 return [
                     'success' => false,
-                    'errors' => $this->error->exception->suberrors
+                    'errors' => $this->error->exception->suberrors ?? []
                 ];
             }
 
@@ -62,7 +62,7 @@ class ApiResponse {
                             'code' => $this->error->code,
                             'subcode' => $this->error->exception->getCode(),
                             'msg' => $this->error->msg . ': ' . $this->error->exception->getMessage()
-                                . '; Response body begins with: ' . substr($this->error->exception->response_body, 0, 200)
+                                . '; Response body begins with: ' . substr($this->error->exception->response_body ?? '', 0, 200)
                         ]
                     ]
                 ];

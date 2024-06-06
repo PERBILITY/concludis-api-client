@@ -7,7 +7,7 @@ require __DIR__ . '/../../config/config.php';
 use Concludis\ApiClient\V2\Api;
 
 
-$api = new Api('tm.dev.api2');
+$api = new Api('v2.example.source');
 
 $response = $api
     ->BoardsGetEndpoint()

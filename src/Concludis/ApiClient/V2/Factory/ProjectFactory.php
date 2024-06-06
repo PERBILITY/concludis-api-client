@@ -18,7 +18,6 @@ use Concludis\ApiClient\Resources\PositionTitle;
 use Concludis\ApiClient\Resources\Project;
 use Concludis\ApiClient\Resources\Schedule;
 use Concludis\ApiClient\Resources\Seniority;
-use Concludis\ApiClient\Storage\PlaceRepository;
 use Concludis\ApiClient\Util\DateUtil;
 use DateTimeZone;
 use Exception;
@@ -344,25 +343,6 @@ class ProjectFactory {
                         'name' => $v['region_name']
                     ]);
                 }
-
-                $has_no_latlon = $v['latitude'] === null || $v['longitude'] === null || (float)$v['latitude'] === 0.0 ||  (float)$v['longitude'] === 0.0;
-                $has_usefull_place_data = !empty($v['country_code']) && !empty($v['postal_code']) && !empty($v['city']);
-
-                if($has_no_latlon && $has_usefull_place_data) {
-
-                    $place = PlaceRepository::factory()
-                        ->addFilter(PlaceRepository::FILTER_TYPE_COUNTRY_CODE, $v['country_code'])
-                        ->addFilter(PlaceRepository::FILTER_TYPE_POSTAL_CODE, $v['postal_code'])
-                        ->addFilter(PlaceRepository::FILTER_TYPE_PLACE_NAME, $v['city'])
-                        ->fetchOne();
-
-                    if($place !== null) {
-                        $v['latitude'] = $place->lat;
-                        $v['longitude'] = $place->lon;
-                    }
-                    unset($place);
-                }
-                unset($has_no_latlon, $has_usefull_place_data);
 
                 $pdata['locations'][] = new Location([
                     'source_id' => $source_id,
