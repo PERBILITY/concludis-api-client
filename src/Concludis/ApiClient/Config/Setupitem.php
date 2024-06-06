@@ -23,7 +23,7 @@ class Setupitem {
     /**
      * @var mixed|null
      */
-    public mixed $value;
+    public mixed $value = null;
 
     public function __construct(array $data = []) {
 
