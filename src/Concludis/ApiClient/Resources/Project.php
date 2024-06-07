@@ -130,6 +130,10 @@ class Project {
      */
     public ?Person $contact_internal = null;
 
+    public string $contact_custom_email = '';
+
+    public string $contact_custom_phone = '';
+
     /**
      * @var Company|null
      */
@@ -387,6 +391,11 @@ class Project {
                 $this->contact_internal = new Person($data['contact_internal']);
             }
         }
+
+        $this->contact_custom_email = (string)($data['contact_custom_email'] ?? '');
+
+        $this->contact_custom_phone = (string)($data['contact_custom_phone'] ?? '');
+
         if (array_key_exists('company', $data)) {
             if($data['company'] instanceof Company) {
                 $this->company = $data['company'];
