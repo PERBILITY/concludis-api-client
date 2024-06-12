@@ -43,7 +43,7 @@ class PDO extends \PDO {
             return self::$instance;
         }
 
-        $dsn = 'mysql:host=' . Baseconfig::$db_host . ';dbname=' . Baseconfig::$db_name . ';charset=utf8';
+        $dsn = 'mysql:host=' . Baseconfig::$db_host . ';dbname=' . Baseconfig::$db_name . ';charset=utf8mb4';
 
         $opt = [
             self::ATTR_ERRMODE => self::ERRMODE_EXCEPTION,
