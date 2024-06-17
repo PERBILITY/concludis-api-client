@@ -15,7 +15,10 @@ use Concludis\ApiClient\Resources\Schedule;
 use Concludis\ApiClient\Util\ArrayUtil;
 use DateTime;
 use Exception;
+use PDOStatement;
 use RuntimeException;
+use TypeError;
+
 use function in_array;
 
 class ProjectRepository {
@@ -403,6 +406,81 @@ class ProjectRepository {
         }
 
         return $data;
+    }
+
+
+    /**
+     * Exec callback for location-inflated projects.
+     * That means that we exec the given callback for a single project multiple times! One time for each assigned
+     * location as long as it matches the filter criteria.
+     * Be careful. The project object is manipulated here. It holds max one location in locations property.
+     *
+     * @throws Exception
+     */
+    public function execLocationInflated(callable $callback): void {
+
+        $query_parts = $this->createQueryParts(true);
+
+        $query_parts['location_inflation'] = [
+            'join' => ['location', 'local_location']
+        ];
+
+        if(array_key_exists('radius', $query_parts)) {
+            $this->addOrder('distance');
+        }
+
+        $query = $this->prepareQueryParts($query_parts);
+
+        if (array_key_exists(self::FILTER_TYPE_PAGINATION, $this->filter)) {
+            $tmp_filter = $this->filter[self::FILTER_TYPE_PAGINATION];
+            $limit = array_key_exists('limit', $tmp_filter) ? (int)$tmp_filter['limit'] : 0;
+            $offset = array_key_exists('offset', $tmp_filter) ? (int)$tmp_filter['offset'] : 0;
+            $query['limit'] = 'LIMIT ' . $offset . ',' . $limit;
+        }
+
+        if(!empty($this->order)){
+            $order_parts = [];
+            foreach ($this->order as $k => $v) {
+                $order_parts[] = $k . ' ' . ($v ? 'ASC' : 'DESC');
+            }
+            $query['order'] = 'ORDER BY ' . implode(',', $order_parts);
+        }
+
+        $pdo = PDO::getInstance();
+
+        $query_select = 'SELECT `project`.*, `location`.*' .
+            (!empty($query['addons']) ? ",\n" . implode(" ,\n", $query['addons']) . " \n" : '') .
+            ' FROM `'.CONCLUDIS_TABLE_PROJECT.'` `project` ' .
+            (!empty($query['join']) ? "\n" . implode(" \n", $query['join']) . " \n" : '') .
+            'WHERE 1 ' .
+            (!empty($query['where']) ? "\n" . 'AND ' . implode(' AND ', $query['where']) . " \n" : '') .
+            'GROUP BY `project`.`source_id`, `project`.`project_id`, `location`.`location_id`  ' .
+            (!empty($query['order']) ? $query['order'] . " \n" : '') .
+            (!empty($query['limit']) ? $query['limit'] . " \n" : '');
+
+        $query_phs = array_merge($query['ph'], $query['ph_addons']);
+
+        $pdo->select($query_select, $query_phs, static function(PDOStatement $stmt) use ($callback) {
+
+            foreach($stmt as $d) {
+
+                $location_id = $d['location_id'];
+                $project = new Project(json_decode($d['data'], true, 512, JSON_THROW_ON_ERROR));
+
+                $project->locations = array_values(array_filter($project->locations, static function(Location $loc) use ($location_id) {
+                    return $loc->id === $location_id;
+                }));
+
+                try {
+                    $callback($project);
+                } catch (TypeError $e) {
+                    throw new RuntimeException('TypeError occurred on callback', 0, $e);
+                } catch (Exception $e) {
+                    throw new RuntimeException('Exception occurred on callback', 0, $e);
+                }
+
+            }
+        });
     }
 
     /**

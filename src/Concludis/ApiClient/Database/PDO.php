@@ -13,6 +13,7 @@ use Concludis\ApiClient\Config\Baseconfig;
 use Exception;
 use PDOStatement;
 use RuntimeException;
+use TypeError;
 use function is_array;
 use PDOException;
 
@@ -165,18 +166,22 @@ class PDO extends \PDO {
     }
 
     /**
-     * @param string $sql
-     * @param array $placeholders
+     * @param  string  $sql
+     * @param  array  $placeholders
+     * @param  callable|null  $callback
      * @return array
-     * @throws Exception
      */
-    public function select(string $sql, array $placeholders = array()): array {
+    public function select(string $sql, array $placeholders = array(), ?callable $callback = null): array {
 
 //        static $count = 0;
 //
 //        try {
 
         $start_time = microtime(true);
+
+        if($callback !== null) {
+            $this->setAttribute(self::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
+        }
 
         if (!empty($placeholders)) {
 
@@ -189,6 +194,22 @@ class PDO extends \PDO {
         } else {
 
             $stmt = $this->query($sql);
+        }
+
+
+        if($callback !== null) {
+
+            try {
+                $callback($stmt);
+            } catch (TypeError $e) {
+                throw new RuntimeException('TypeError occurred on callback', 0, $e);
+            } catch (Exception $e) {
+                throw new RuntimeException('Exception occurred on callback', 0, $e);
+            } finally {
+                $this->setAttribute(self::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
+            }
+
+            return [];
         }
 
         $res = $stmt->fetchAll();
