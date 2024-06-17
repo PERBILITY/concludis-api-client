@@ -179,19 +179,23 @@ class PDO extends \PDO {
 
         $start_time = microtime(true);
 
-        if($callback !== null) {
-            $this->setAttribute(self::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
-        }
 
         if (!empty($placeholders)) {
+
+            if($callback !== null) {
+                $this->setAttribute(self::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
+            }
 
             $ph = $this->preparePlaceholders($sql, $placeholders);
 
             $stmt = $this->prepare($sql);
 
-            if($callback === null) {
+            if($callback !== null) {
+                $this->setAttribute(self::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
+            } else {
                 $stmt->execute($ph);
             }
+
 
         } else {
 
@@ -207,8 +211,6 @@ class PDO extends \PDO {
                 throw new RuntimeException('TypeError occurred on callback', 0, $e);
             } catch (Exception $e) {
                 throw new RuntimeException('Exception occurred on callback', 0, $e);
-            } finally {
-                $this->setAttribute(self::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
             }
 
             return [];
