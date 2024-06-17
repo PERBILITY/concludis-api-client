@@ -189,7 +189,9 @@ class PDO extends \PDO {
 
             $stmt = $this->prepare($sql);
 
-            $stmt->execute($ph);
+            if($callback === null) {
+                $stmt->execute($ph);
+            }
 
         } else {
 
