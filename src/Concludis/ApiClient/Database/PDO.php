@@ -44,6 +44,13 @@ class PDO extends \PDO {
             return self::$instance;
         }
 
+        self::$instance = self::createInstance();
+
+        return self::$instance;
+    }
+
+    public static function createInstance(): PDO {
+
         $dsn = 'mysql:host=' . Baseconfig::$db_host . ';dbname=' . Baseconfig::$db_name . ';charset=utf8mb4';
 
         $opt = [
@@ -52,9 +59,7 @@ class PDO extends \PDO {
             self::ATTR_EMULATE_PREPARES => false,
         ];
 
-        self::$instance = new self($dsn, Baseconfig::$db_user, Baseconfig::$db_pass, $opt);
-
-        return self::$instance;
+        return new self($dsn, Baseconfig::$db_user, Baseconfig::$db_pass, $opt);
     }
 
     /**
@@ -172,47 +177,51 @@ class PDO extends \PDO {
      * @return array
      */
     public function select(string $sql, array $placeholders = array(), ?callable $callback = null): array {
+//
+//        $tmp = self::$instance;
+//        self::$instance = null;
+//        self::getInstance();
 
 //        static $count = 0;
 //
 //        try {
 
         $start_time = microtime(true);
+        $pdo = $this;
 
+        if($callback !== null) {
+            $pdo = self::createInstance();
+            $pdo->setAttribute(self::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
+        }
 
         if (!empty($placeholders)) {
 
-            if($callback !== null) {
-                $this->setAttribute(self::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
-            }
+            $ph = $pdo->preparePlaceholders($sql, $placeholders);
 
-            $ph = $this->preparePlaceholders($sql, $placeholders);
-
-            $stmt = $this->prepare($sql);
+            $stmt = $pdo->prepare($sql);
 
             if($callback !== null) {
-                $this->setAttribute(self::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
+                $pdo->setAttribute(self::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
             } else {
                 $stmt->execute($ph);
             }
 
-
         } else {
 
-            $stmt = $this->query($sql);
+            $stmt = $pdo->query($sql);
         }
 
 
         if($callback !== null) {
-
             try {
                 $callback($stmt);
             } catch (TypeError $e) {
                 throw new RuntimeException('TypeError occurred on callback', 0, $e);
             } catch (Exception $e) {
                 throw new RuntimeException('Exception occurred on callback', 0, $e);
+            } finally {
+                $pdo = null;
             }
-
             return [];
         }
 
@@ -235,7 +244,7 @@ class PDO extends \PDO {
 //            if ($count < self::DEADLOCK_MAX_RETRIES && $e->getCode() === 40001) {
 //                usleep(self::RETRY_SLEEP_US * ($count + 1));
 //                $count++;
-//                $res = $this->select($sql, $placeholders);
+//                $res = $pdo->select($sql, $placeholders);
 //                $count--;
 //                return $res;
 //            }
