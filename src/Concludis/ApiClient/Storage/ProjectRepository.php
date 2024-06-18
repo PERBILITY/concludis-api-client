@@ -381,7 +381,7 @@ class ProjectRepository {
             (!empty($query['join']) ? "\n" . implode(" \n", $query['join']) . " \n" : '') .
             'WHERE 1 ' .
             (!empty($query['where']) ? "\n" . 'AND ' . implode(' AND ', $query['where']) . " \n" : '') .
-            'GROUP BY `project`.`source_id`, `project`.`project_id`, `location`.`location_id`  ' .
+//            'GROUP BY `project`.`source_id`, `project`.`project_id`, `location`.`location_id` ' .
             (!empty($query['order']) ? $query['order'] . " \n" : '') .
             (!empty($query['limit']) ? $query['limit'] . " \n" : '');
 
@@ -454,7 +454,7 @@ class ProjectRepository {
             (!empty($query['join']) ? "\n" . implode(" \n", $query['join']) . " \n" : '') .
             'WHERE 1 ' .
             (!empty($query['where']) ? "\n" . 'AND ' . implode(' AND ', $query['where']) . " \n" : '') .
-            'GROUP BY `project`.`source_id`, `project`.`project_id`, `location`.`location_id`  ' .
+//            'GROUP BY `project`.`source_id`, `project`.`project_id`, `location`.`location_id`  ' .
             (!empty($query['order']) ? $query['order'] . " \n" : '') .
             (!empty($query['limit']) ? $query['limit'] . " \n" : '');
 
