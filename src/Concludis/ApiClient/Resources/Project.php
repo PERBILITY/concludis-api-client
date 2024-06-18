@@ -550,6 +550,10 @@ class Project {
         return DateUtil::parseMysqlDate($this->date_from_internal);
     }
 
+    public function gpid(): string {
+        return $this->source_id . 'P' . $this->id;
+    }
+
     /**
      * @param string|null $locale
      * @return string
