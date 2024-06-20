@@ -728,15 +728,14 @@ class Project {
     }
 
     /**
-     * @param Project $project
      * @param string|null $locale
      * @param bool $internal
      * @return string
      * @throws Exception
      */
-    public static function getJobadMarkupFromContainers(Project $project, ?string $locale = null, bool $internal = false): string {
+    public function getJobadMarkupFromContainers(?string $locale = null, bool $internal = false): string {
 
-        $containers = $project->getTranslatedJobadContainers($locale);
+        $containers = $this->getTranslatedJobadContainers($locale);
 
         $all_containers = [];
         foreach ($containers as $jc) {
@@ -763,13 +762,12 @@ class Project {
     }
 
     /**
-     * @param Project $project
      * @param string|null $locale
      * @param bool $internal
      * @return string
      * @throws Exception
      */
-    public static function getPurifiedJobadMarkupFromContainers(Project $project, ?string $locale = null, bool $internal = false): string {
+    public function getPurifiedJobadMarkupFromContainers(?string $locale = null, bool $internal = false): string {
 
         $config = HTMLPurifier_Config::createDefault();
         $cacheDirectory = sys_get_temp_dir();
@@ -781,7 +779,7 @@ class Project {
         $config->set('HTML.AllowedElements', array('p', 'br', 'ul', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'strong', 'em', 'b', 'i'));
         $config->set('CSS.AllowedProperties', array()); // remove all CSS
 
-        return (new HTMLPurifier($config))->purify(self::getJobadMarkupFromContainers($project, $locale, $internal));
+        return (new HTMLPurifier($config))->purify($this->getJobadMarkupFromContainers($locale, $internal));
     }
 
     /**
