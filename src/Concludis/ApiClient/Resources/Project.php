@@ -24,6 +24,23 @@ class Project {
     public const APPLY_TYPE_TALKNJOB = 'T';
 
     /**
+     * Parttime Position (Teilzeit)
+     */
+    public const TAG_FULLTIME = 'fulltime';
+    /**
+     * Fulltime Position (Vollzeit)
+     */
+    public const TAG_PARTTIME = 'parttime';
+    /**
+     * Temporary Position (Befristet)
+     */
+    public const TAG_TEMPORARY = 'temporary';
+    /**
+     * Internship (Praktikum)
+     */
+    public const TAG_INTERN = 'intern';
+
+    /**
      * @var string
      */
     public string $source_id = '';
@@ -579,6 +596,51 @@ class Project {
     public function getTeaser(?string $locale = null): string {
         $alocale = ($locale ?? $this->locale);
         return $this->getPropTranslated('teaser', $alocale);
+    }
+
+    /**
+     * returns an array of TAG_* strings depending on job categorization
+     * @return array
+     */
+    public function getTags(): array {
+
+        $tags = [];
+        if($this->schedule !== null) {
+            /**
+             * Schedule Mapping
+             */
+            $schedule_global_id_tag_mapping = [
+                1 => [self::TAG_FULLTIME],
+                2 => [self::TAG_PARTTIME],
+                5 => [self::TAG_PARTTIME],
+                6 => [self::TAG_PARTTIME],
+                7 => [self::TAG_PARTTIME],
+                8 => [self::TAG_PARTTIME],
+                12 => [self::TAG_FULLTIME, self::TAG_PARTTIME],
+            ];
+            if (array_key_exists($this->schedule->global_id, $schedule_global_id_tag_mapping)) {
+                $target_tags = $schedule_global_id_tag_mapping[$this->schedule->global_id];
+                foreach($target_tags as $tag) {
+                    $tags[] = $tag;
+                }
+            }
+        }
+
+        /**
+         * befristet (temporary)
+         */
+        if($this->position_information->position_description->duration_temporary_or_regular === 1) {
+            $tags[] = self::TAG_TEMPORARY;
+        }
+
+        /**
+         * praktikum
+         */
+        if($this->classification?->global_id === 5) {
+            $tags[] = self::TAG_INTERN;
+        }
+
+        return $tags;
     }
 
     /**
