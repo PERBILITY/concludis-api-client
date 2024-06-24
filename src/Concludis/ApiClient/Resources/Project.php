@@ -7,6 +7,8 @@ use Concludis\ApiClient\Storage\ProjectRepository;
 use Concludis\ApiClient\Util\DateUtil;
 use DateTime;
 use Exception;
+use HTMLPurifier;
+use HTMLPurifier_Config;
 use JsonException;
 
 class Project {
@@ -785,6 +787,61 @@ class Project {
 
         }
         return implode('', $data);
+    }
+
+    /**
+     * @param string|null $locale
+     * @param bool $internal
+     * @return string
+     * @throws Exception
+     */
+    public function getJobadMarkupFromContainers(?string $locale = null, bool $internal = false): string {
+
+        $containers = $this->getTranslatedJobadContainers($locale);
+
+        $all_containers = [];
+        foreach ($containers as $jc) {
+            $type = $jc->type;
+
+            $content = $jc->content_external;
+
+            if($internal && !empty($jc->content_internal)) {
+                $content = $jc->content_internal;
+            }
+
+            if (empty($content)) {
+                continue;
+            }
+
+            if ($type === 'ptitel') {
+                $content = '<h1>' . strip_tags($content, 'span') . '</h1>';
+            }
+
+            $all_containers[] = $content;
+        }
+
+        return implode("\n", $all_containers);
+    }
+
+    /**
+     * @param string|null $locale
+     * @param bool $internal
+     * @return string
+     * @throws Exception
+     */
+    public function getPurifiedJobadMarkupFromContainers(?string $locale = null, bool $internal = false): string {
+
+        $config = HTMLPurifier_Config::createDefault();
+        $cacheDirectory = sys_get_temp_dir();
+
+        $config->set('Cache.SerializerPath', $cacheDirectory);
+        $config->set('AutoFormat.RemoveEmpty', true); // remove empty elements
+        $config->set('AutoFormat.AutoParagraph', true);
+        $config->set('HTML.Doctype', 'XHTML 1.0 Strict'); // valid XML output (?)
+        $config->set('HTML.AllowedElements', array('p', 'br', 'ul', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'strong', 'em', 'b', 'i'));
+        $config->set('CSS.AllowedProperties', array()); // remove all CSS
+
+        return (new HTMLPurifier($config))->purify($this->getJobadMarkupFromContainers($locale, $internal));
     }
 
     /**
