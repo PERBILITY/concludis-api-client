@@ -25,6 +25,11 @@ class Project {
     public const APPLY_TYPE_PITCHYOU = 'P';
     public const APPLY_TYPE_TALKNJOB = 'T';
 
+    public const REMOTE_TYPE_NONE = 0;
+    public const REMOTE_TYPE_PARTIAL_HOMEOFFICE = 1;
+    public const REMOTE_TYPE_COMPLETELY_HOMEOFFICE = 2;
+    public const REMOTE_TYPE_REMOTE_WORK = 3;
+
     /**
      * Parttime Position (Teilzeit)
      */
@@ -243,7 +248,6 @@ class Project {
      */
     public ?string $date_from_public = null;
 
-
     /**
      * @var string|null
      */
@@ -258,6 +262,21 @@ class Project {
      * @var bool
      */
     public bool $ba_is_published = false;
+
+    /**
+     * @var string
+     */
+    public string $employerbrand = '';
+
+    /**
+     * @var int|null
+     */
+    public ?int $remotetype = null;
+
+    /**
+     * @var Salary|null
+     */
+    public ?Salary $salary = null;
 
     /**
      * @var PositionInformation
@@ -550,6 +569,27 @@ class Project {
                     $this->extended_props = (array)json_decode($data['extended_props'], false, 512, JSON_THROW_ON_ERROR);
                 } catch (JsonException) {
                 }
+            }
+        }
+
+
+        if(array_key_exists('employerbrand', $data) && is_string($data['employerbrand'])) {
+            $this->employerbrand = $data['employerbrand'];
+        }
+
+        if(array_key_exists('remotetype', $data) && is_int($data['remotetype'])) {
+            $this->remotetype = $data['remotetype'];
+        }
+
+        if(array_key_exists('remotetype', $data) && is_int($data['remotetype'])) {
+            $this->remotetype = $data['remotetype'];
+        }
+
+        if(array_key_exists('salary', $data)) {
+            if($data['salary'] instanceof Salary) {
+                $this->salary = $data['salary'];
+            } else if(is_array($data['salary'])) {
+                $this->salary = Salary::fromArray($data['salary']);
             }
         }
 

@@ -308,6 +308,8 @@ class ProjectFactory {
             unset($tmp);
         }
 
+
+
 //  locations...
 //        {
 //            "id": 23,
@@ -491,6 +493,10 @@ class ProjectFactory {
             $pdata['contact_internal'] = PersonFactory::createFromResponseObject($source_id, $data['contact_internal']);
         }
 
+        if(array_key_exists('employerbrand', $data) && is_string($data['employerbrand'])){
+            $pdata['employerbrand'] = trim($data['employerbrand']);
+        }
+
         if(array_key_exists('primary_company', $data) && $data['primary_company'] !== null){
 
             $v = $data['primary_company'];
@@ -633,6 +639,16 @@ class ProjectFactory {
                 ]);
             }
         }
+
+
+        if(array_key_exists('remotetype', $data) && is_int($data['remotetype'])) {
+            $pdata['remotetype'] = $data['remotetype'];
+        }
+
+        if(array_key_exists('salary', $data) && is_array($data['salary'])) {
+            $pdata['salary'] = $data['salary'];
+        }
+
 
         $pdata['jobad_url'] = (string)$data['job_ad_url'];
         $pdata['jobad_url_internal'] = (string)$data['job_ad_url_internal'];
