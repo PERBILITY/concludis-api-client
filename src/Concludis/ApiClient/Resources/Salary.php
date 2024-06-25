@@ -64,6 +64,55 @@ class Salary {
         throw new RuntimeException('invalid salary type');
     }
 
+
+    public function toIndeedString(): string {
+        if ($this->type === self::TYPE_STRUCTURED) {
+
+            $min = $this->min ?? null;
+            $max = $this->max ?? null;
+            $period = $this->period;
+
+            $map = [
+                'EUR' => '€',
+                'USD' => '$',
+                'GBP' => '£'
+            ];
+
+            $currency = (string)($map[$this->currency] ?? $this->currency);
+
+            if ($min !== null && $max !== null){
+                if ($min === $max){
+                    return sprintf("%s%s / %s", $currency,
+                        number_format($min, 2, '.', ''),
+                        $period
+                    );
+                }
+                return sprintf("%s%s - %s%s / %s", $currency,
+                    number_format($min, 2, '.', ''),
+                    $currency,
+                    number_format($max, 2, '.', ''),
+                    $period
+                );
+            }
+
+            if ($min !== null) {
+                return sprintf("%s%s+ per %s", $currency,
+                    number_format($min, 2, '.', ''),
+                    $period
+                );
+            }
+
+            if ($max !== null) {
+                return sprintf("%s%s / %s", $currency,
+                    number_format($max, 2, '.', ''),
+                    $period
+                );
+            }
+        }
+        return '';
+
+    }
+
     public static function periodEnum(): array {
         return [
             self::PERIOD_YEAR,
