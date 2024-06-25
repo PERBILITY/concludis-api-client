@@ -39,10 +39,11 @@ class Salary {
                 throw new RuntimeException('invalid period');
             }
             $this->currency = (string)($data['currency'] ?? '');
-            if(is_float(($data['min'] ?? null))) {
+
+            if(is_numeric(($data['min'] ?? null))) {
                 $this->min = (float)$data['min'];
             }
-            if(is_float(($data['max'] ?? null))) {
+            if(is_numeric(($data['max'] ?? null))) {
                 $this->max = (float)$data['max'];
             }
             if($this->min === null && $this->max === null) {
