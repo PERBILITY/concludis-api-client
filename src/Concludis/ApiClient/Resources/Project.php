@@ -278,6 +278,17 @@ class Project {
      */
     public ?Salary $salary = null;
 
+
+    /**
+     * @var int|null
+     */
+    public ?int $indeed_enabled = null;
+
+    /**
+     * @var array|null
+     */
+    public ?array $indeed_apply_data = null;
+
     /**
      * @var PositionInformation
      */
@@ -591,6 +602,13 @@ class Project {
             } else if(is_array($data['salary'])) {
                 $this->salary = Salary::fromArray($data['salary']);
             }
+        }
+
+        if(array_key_exists('indeed_enabled', $data) && is_int($data['indeed_enabled'])) {
+            $this->indeed_enabled = $data['indeed_enabled'];
+        }
+        if(array_key_exists('indeed_apply_data', $data) && is_array($data['indeed_apply_data'])) {
+            $this->indeed_apply_data = $data['indeed_apply_data'];
         }
 
     }
