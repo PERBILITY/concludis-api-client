@@ -52,6 +52,8 @@ class ProjectRepository {
     public const FILTER_TYPE_GLOBAL_CLASSIFICATION = 'global_classification';
     public const FILTER_TYPE_GLOBAL_CATEGORY = 'global_category';
 
+    public const FILTER_TYPE_INDEED_ENABLED = 'indeed_enabled';
+
     private const FILTER_TYPE_PAGINATION = 'pagination';
     private const FILTER_TYPE_RADIUS = 'radius';
 
@@ -1488,6 +1490,20 @@ class ProjectRepository {
             $query_parts['int_pub'] = [
                 'where' => '`project`.`published_public` = 1'
             ];
+        }
+
+        if (array_key_exists(self::FILTER_TYPE_INDEED_ENABLED, $this->filter)) {
+            $filter_indeed_enabled = (bool)$this->filter[self::FILTER_TYPE_INT_PUB];
+
+            if($filter_indeed_enabled === true) {
+                $query_parts['indeed_enabled'] = [
+                    'where' => 'CAST(JSON_UNQUOTE(JSON_EXTRACT(`data`, "$.indeed_enabled")) AS UNSIGNED) > 0'
+                ];
+            } else {
+                $query_parts['indeed_enabled'] = [
+                    'where' => 'CAST(JSON_UNQUOTE(JSON_EXTRACT(`data`, "$.indeed_enabled")) AS UNSIGNED) = 0'
+                ];
+            }
         }
 
         if (array_key_exists(self::FILTER_TYPE_KEYWORD, $this->filter)) {
