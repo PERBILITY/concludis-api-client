@@ -53,6 +53,7 @@ class ProjectRepository {
     public const FILTER_TYPE_GLOBAL_CATEGORY = 'global_category';
 
     public const FILTER_TYPE_INDEED_ENABLED = 'indeed_enabled';
+    public const FILTER_TYPE_CUSTOM = 'custom';
 
     private const FILTER_TYPE_PAGINATION = 'pagination';
     private const FILTER_TYPE_RADIUS = 'radius';
@@ -1503,6 +1504,17 @@ class ProjectRepository {
                 $query_parts['indeed_enabled'] = [
                     'where' => 'CAST(JSON_UNQUOTE(JSON_EXTRACT(`data`, "$.indeed_enabled")) AS UNSIGNED) = 0'
                 ];
+            }
+        }
+        if (array_key_exists(self::FILTER_TYPE_CUSTOM, $this->filter) ) {
+            $filter_custom = $this->filter[self::FILTER_TYPE_CUSTOM];
+            if(is_array($filter_custom)) {
+                foreach($filter_custom as $k => $v) {
+                    $query_parts['custom' . $k] = [
+                        'where' => $v['where'] ?? null,
+                        'ph' => $v['ph'] ?? null,
+                    ];
+                }
             }
         }
 

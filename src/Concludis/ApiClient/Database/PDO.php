@@ -200,11 +200,7 @@ class PDO extends \PDO {
 
             $stmt = $pdo->prepare($sql);
 
-            if($callback !== null) {
-                $pdo->setAttribute(self::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
-            } else {
-                $stmt->execute($ph);
-            }
+            $stmt->execute($ph);
 
         } else {
 
