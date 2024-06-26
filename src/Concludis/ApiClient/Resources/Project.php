@@ -285,11 +285,6 @@ class Project {
     public ?int $indeed_enabled = null;
 
     /**
-     * @var array|null
-     */
-    public ?array $indeed_apply_data = null;
-
-    /**
      * @var PositionInformation
      */
     public PositionInformation $position_information;
@@ -606,9 +601,6 @@ class Project {
 
         if(array_key_exists('indeed_enabled', $data) && is_int($data['indeed_enabled'])) {
             $this->indeed_enabled = $data['indeed_enabled'];
-        }
-        if(array_key_exists('indeed_apply_data', $data) && is_array($data['indeed_apply_data'])) {
-            $this->indeed_apply_data = $data['indeed_apply_data'];
         }
 
     }

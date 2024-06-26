@@ -1512,7 +1512,7 @@ class ProjectRepository {
                 foreach($filter_custom as $k => $v) {
                     $query_parts['custom' . $k] = [
                         'where' => $v['where'] ?? null,
-                        'ph' => $v['ph'] ?? null,
+                        'ph' => $v['ph'] ?? [],
                     ];
                 }
             }

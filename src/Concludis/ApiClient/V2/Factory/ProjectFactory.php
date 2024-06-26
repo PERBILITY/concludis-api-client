@@ -652,9 +652,6 @@ class ProjectFactory {
         if(array_key_exists('indeed_enabled', $data) && is_int($data['indeed_enabled'])) {
             $pdata['indeed_enabled'] = $data['indeed_enabled'];
         }
-        if(array_key_exists('indeed_extended', $data) && is_array($data['indeed_extended'])) {
-            $pdata['indeed_apply_data'] = $data['indeed_extended'];
-        }
 
 
         $pdata['jobad_url'] = (string)$data['job_ad_url'];
