@@ -267,6 +267,24 @@ class BoardRepository {
     }
 
     /**
+     * @param  string  $source_id
+     * @param  int  $board_id
+     * @return bool
+     * @throws Exception
+     */
+    public static function purgeBoard(string $source_id, int $board_id): bool {
+
+        $pdo = PDO::getInstance();
+
+        $sql = 'DELETE FROM `'.CONCLUDIS_TABLE_LOCAL_BOARD.'` WHERE `source_id` = :source_id AND `board_id` = :board_id';
+
+        return $pdo->delete($sql,[
+            ':source_id' => $source_id,
+            ':board_id' => $board_id
+        ]);
+    }
+
+    /**
      * @param string $source_id
      * @param string $identifier
      * @param bool $internal
