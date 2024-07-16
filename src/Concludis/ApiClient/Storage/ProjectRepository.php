@@ -35,6 +35,7 @@ class ProjectRepository {
     public const FILTER_TYPE_CLASSIFICATION = 'classification';
     public const FILTER_TYPE_CATEGORY = 'category';
     public const FILTER_TYPE_COMPANY = 'company';
+    public const FILTER_TYPE_LOCATION = 'location';
     public const FILTER_TYPE_GROUP1 = 'group1';
     public const FILTER_TYPE_GROUP2 = 'group2';
     public const FILTER_TYPE_GROUP3 = 'group3';
@@ -675,14 +676,7 @@ class ProjectRepository {
 
         if (array_key_exists(self::FILTER_TYPE_COMPANY, $this->filter)) {
 
-            $tmp_filter = $this->filter[self::FILTER_TYPE_COMPANY];
-            if (is_array($tmp_filter)) {
-                $tmp_filter = ArrayUtil::toIntArray($tmp_filter);
-            } else if (is_int($tmp_filter)) {
-                $tmp_filter = ArrayUtil::toIntArray([$tmp_filter]);
-            } else {
-                $tmp_filter = [];
-            }
+            $tmp_filter = self::getFilter($this->filter[self::FILTER_TYPE_COMPANY], 'int');
 
             if (!empty($tmp_filter)) {
 
@@ -719,14 +713,7 @@ class ProjectRepository {
         }
         else if (array_key_exists(self::FILTER_TYPE_MERGED_COMPANY, $this->filter)) {
 
-            $tmp_filter = $this->filter[self::FILTER_TYPE_MERGED_COMPANY];
-            if (is_array($tmp_filter)) {
-                $tmp_filter = ArrayUtil::toStringArray($tmp_filter);
-            } else if (is_string($tmp_filter)) {
-                $tmp_filter = ArrayUtil::toStringArray([$tmp_filter]);
-            } else {
-                $tmp_filter = [];
-            }
+            $tmp_filter = self::getFilter($this->filter[self::FILTER_TYPE_MERGED_COMPANY], 'string');
 
             if (!empty($tmp_filter)) {
 
@@ -764,16 +751,49 @@ class ProjectRepository {
             }
         }
 
+        if (array_key_exists(self::FILTER_TYPE_LOCATION, $this->filter)) {
+
+            $tmp_filter = self::getFilter($this->filter[self::FILTER_TYPE_LOCATION], 'string');
+
+            if (!empty($tmp_filter)) {
+
+                $find_ids = array_values(array_diff($tmp_filter, [sha1('-1')]));
+                $find_others = in_array(sha1('-1'), $tmp_filter, true);
+
+                $tmp_query_parts = [];
+                $placeholders = [];
+
+                if (!empty($find_ids)) {
+                    $tmp_query_parts[] = 'EXISTS(' . $ln .
+                        '   SELECT 1 FROM `' . CONCLUDIS_TABLE_PROJECT_LOCATION . '` `location` ' . $ln .
+                        '      JOIN `'.CONCLUDIS_TABLE_LOCAL_LOCATION.'` `local_location` ' . $ln .
+                        '       ON (`location`.`source_id` = `local_location`.`source_id` AND `location`.`location_id` = `local_location`.`location_id`) ' . $ln .
+                        '   WHERE `location`.`project_id` = `project`.`project_id` AND `location`.`source_id` = `project`.`source_id` ' . $ln .
+                        '   AND SHA1(`local_location`.`locality`) IN (:locations) ' . $ln .
+                        ') ' . $ln;
+                    $placeholders[':locations'] = $find_ids;
+                }
+
+                if($find_others) {
+                    $tmp_query_parts[] = '(' . $ln .
+                        '   SELECT 1 FROM `' . CONCLUDIS_TABLE_PROJECT_LOCATION . '` `location` ' . $ln .
+                        '   WHERE `location`.`project_id` = `project`.`project_id` AND `location`.`source_id` = `project`.`source_id` ' . $ln .
+                        '   LIMIT 1' . $ln .
+                        ') IS NULL ' . $ln;
+                }
+
+                if(!empty($tmp_query_parts)) {
+                    $query_parts['location'] = [
+                        'where' => '(' . implode(' OR ', $tmp_query_parts) . ')',
+                        'ph' => $placeholders
+                    ];
+                }
+            }
+        }
+
         if (array_key_exists(self::FILTER_TYPE_BOARD, $this->filter)) {
 
-            $tmp_filter = $this->filter[self::FILTER_TYPE_BOARD];
-            if (is_array($tmp_filter)) {
-                $tmp_filter = ArrayUtil::toIntArray($tmp_filter);
-            } else if (is_int($tmp_filter)) {
-                $tmp_filter = ArrayUtil::toIntArray([$tmp_filter]);
-            } else {
-                $tmp_filter = [];
-            }
+            $tmp_filter = self::getFilter($this->filter[self::FILTER_TYPE_BOARD], 'int');
 
             if (!empty($tmp_filter)) {
 
@@ -811,14 +831,7 @@ class ProjectRepository {
 
         if (array_key_exists(self::FILTER_TYPE_GROUP1, $this->filter)) {
 
-            $tmp_filter = $this->filter[self::FILTER_TYPE_GROUP1];
-            if (is_array($tmp_filter)) {
-                $tmp_filter = ArrayUtil::toIntArray($tmp_filter);
-            } else if (is_int($tmp_filter)) {
-                $tmp_filter = ArrayUtil::toIntArray([$tmp_filter]);
-            } else {
-                $tmp_filter = [];
-            }
+            $tmp_filter = self::getFilter($this->filter[self::FILTER_TYPE_GROUP1], 'int');
 
             if (!empty($tmp_filter)) {
 
@@ -855,14 +868,7 @@ class ProjectRepository {
         }
         else if (array_key_exists(self::FILTER_TYPE_MERGED_GROUP1, $this->filter)) {
 
-            $tmp_filter = $this->filter[self::FILTER_TYPE_MERGED_GROUP1];
-            if (is_array($tmp_filter)) {
-                $tmp_filter = ArrayUtil::toStringArray($tmp_filter);
-            } else if (is_string($tmp_filter)) {
-                $tmp_filter = ArrayUtil::toStringArray([$tmp_filter]);
-            } else {
-                $tmp_filter = [];
-            }
+            $tmp_filter = self::getFilter($this->filter[self::FILTER_TYPE_MERGED_GROUP1], 'string');
 
             if (!empty($tmp_filter)) {
 
@@ -902,14 +908,7 @@ class ProjectRepository {
 
         if (array_key_exists(self::FILTER_TYPE_GROUP2, $this->filter)) {
 
-            $tmp_filter = $this->filter[self::FILTER_TYPE_GROUP2];
-            if (is_array($tmp_filter)) {
-                $tmp_filter = ArrayUtil::toIntArray($tmp_filter);
-            } else if (is_int($tmp_filter)) {
-                $tmp_filter = ArrayUtil::toIntArray([$tmp_filter]);
-            } else {
-                $tmp_filter = [];
-            }
+            $tmp_filter = self::getFilter($this->filter[self::FILTER_TYPE_GROUP2], 'int');
 
             if (!empty($tmp_filter)) {
 
@@ -946,14 +945,7 @@ class ProjectRepository {
         }
         else if (array_key_exists(self::FILTER_TYPE_MERGED_GROUP2, $this->filter)) {
 
-            $tmp_filter = $this->filter[self::FILTER_TYPE_MERGED_GROUP2];
-            if (is_array($tmp_filter)) {
-                $tmp_filter = ArrayUtil::toStringArray($tmp_filter);
-            } else if (is_string($tmp_filter)) {
-                $tmp_filter = ArrayUtil::toStringArray([$tmp_filter]);
-            } else {
-                $tmp_filter = [];
-            }
+            $tmp_filter = self::getFilter($this->filter[self::FILTER_TYPE_MERGED_GROUP2], 'string');
 
             if (!empty($tmp_filter)) {
 
@@ -993,14 +985,7 @@ class ProjectRepository {
 
         if (array_key_exists(self::FILTER_TYPE_GROUP3, $this->filter)) {
 
-            $tmp_filter = $this->filter[self::FILTER_TYPE_GROUP3];
-            if (is_array($tmp_filter)) {
-                $tmp_filter = ArrayUtil::toIntArray($tmp_filter);
-            } else if (is_int($tmp_filter)) {
-                $tmp_filter = ArrayUtil::toIntArray([$tmp_filter]);
-            } else {
-                $tmp_filter = [];
-            }
+            $tmp_filter = self::getFilter($this->filter[self::FILTER_TYPE_GROUP3], 'int');
 
             if (!empty($tmp_filter)) {
 
@@ -1037,14 +1022,7 @@ class ProjectRepository {
         }
         else if (array_key_exists(self::FILTER_TYPE_MERGED_GROUP3, $this->filter)) {
 
-            $tmp_filter = $this->filter[self::FILTER_TYPE_MERGED_GROUP3];
-            if (is_array($tmp_filter)) {
-                $tmp_filter = ArrayUtil::toStringArray($tmp_filter);
-            } else if (is_string($tmp_filter)) {
-                $tmp_filter = ArrayUtil::toStringArray([$tmp_filter]);
-            } else {
-                $tmp_filter = [];
-            }
+            $tmp_filter = self::getFilter($this->filter[self::FILTER_TYPE_MERGED_GROUP3], 'string');
 
             if (!empty($tmp_filter)) {
 
@@ -1084,14 +1062,7 @@ class ProjectRepository {
 
         if (array_key_exists(self::FILTER_TYPE_SENIORITY, $this->filter)) {
 
-            $tmp_filter = $this->filter[self::FILTER_TYPE_SENIORITY];
-            if (is_array($tmp_filter)) {
-                $tmp_filter = ArrayUtil::toStringArray($tmp_filter);
-            } else if (is_string($tmp_filter)) {
-                $tmp_filter = ArrayUtil::toStringArray([$tmp_filter]);
-            } else {
-                $tmp_filter = [];
-            }
+            $tmp_filter = self::getFilter($this->filter[self::FILTER_TYPE_SENIORITY], 'string');
 
             if (!empty($tmp_filter)) {
 
@@ -1128,14 +1099,7 @@ class ProjectRepository {
         }
         else if (array_key_exists(self::FILTER_TYPE_GLOBAL_SENIORITY, $this->filter)) {
 
-            $tmp_filter = $this->filter[self::FILTER_TYPE_GLOBAL_SENIORITY];
-            if (is_array($tmp_filter)) {
-                $tmp_filter = ArrayUtil::toIntArray($tmp_filter);
-            } else if (is_int($tmp_filter)) {
-                $tmp_filter = ArrayUtil::toIntArray([$tmp_filter]);
-            } else {
-                $tmp_filter = [];
-            }
+            $tmp_filter = self::getFilter($this->filter[self::FILTER_TYPE_GLOBAL_SENIORITY], 'int');
 
             if (!empty($tmp_filter)) {
 
@@ -1175,14 +1139,7 @@ class ProjectRepository {
 
         if (array_key_exists(self::FILTER_TYPE_SCHEDULE, $this->filter)) {
 
-            $tmp_filter = $this->filter[self::FILTER_TYPE_SCHEDULE];
-            if (is_array($tmp_filter)) {
-                $tmp_filter = ArrayUtil::toStringArray($tmp_filter);
-            } else if (is_string($tmp_filter)) {
-                $tmp_filter = ArrayUtil::toStringArray([$tmp_filter]);
-            } else {
-                $tmp_filter = [];
-            }
+            $tmp_filter = self::getFilter($this->filter[self::FILTER_TYPE_SCHEDULE], 'string');
 
             if (!empty($tmp_filter)) {
 
@@ -1246,14 +1203,7 @@ class ProjectRepository {
         }
         else if (array_key_exists(self::FILTER_TYPE_GLOBAL_SCHEDULE, $this->filter)) {
 
-            $tmp_filter = $this->filter[self::FILTER_TYPE_GLOBAL_SCHEDULE];
-            if (is_array($tmp_filter)) {
-                $tmp_filter = ArrayUtil::toIntArray($tmp_filter);
-            } else if (is_int($tmp_filter)) {
-                $tmp_filter = ArrayUtil::toIntArray([$tmp_filter]);
-            } else {
-                $tmp_filter = [];
-            }
+            $tmp_filter = self::getFilter($this->filter[self::FILTER_TYPE_GLOBAL_SCHEDULE], 'int');
 
             if (!empty($tmp_filter)) {
 
@@ -1301,14 +1251,7 @@ class ProjectRepository {
 
         if (array_key_exists(self::FILTER_TYPE_CLASSIFICATION, $this->filter)) {
 
-            $tmp_filter = $this->filter[self::FILTER_TYPE_CLASSIFICATION];
-            if (is_array($tmp_filter)) {
-                $tmp_filter = ArrayUtil::toStringArray($tmp_filter);
-            } else if (is_string($tmp_filter)) {
-                $tmp_filter = ArrayUtil::toStringArray([$tmp_filter]);
-            } else {
-                $tmp_filter = [];
-            }
+            $tmp_filter = self::getFilter($this->filter[self::FILTER_TYPE_CLASSIFICATION], 'string');
 
             if (!empty($tmp_filter)) {
 
@@ -1345,14 +1288,7 @@ class ProjectRepository {
         }
         else if (array_key_exists(self::FILTER_TYPE_GLOBAL_CLASSIFICATION, $this->filter)) {
 
-            $tmp_filter = $this->filter[self::FILTER_TYPE_GLOBAL_CLASSIFICATION];
-            if (is_array($tmp_filter)) {
-                $tmp_filter = ArrayUtil::toIntArray($tmp_filter);
-            } else if (is_int($tmp_filter)) {
-                $tmp_filter = ArrayUtil::toIntArray([$tmp_filter]);
-            } else {
-                $tmp_filter = [];
-            }
+            $tmp_filter = self::getFilter($this->filter[self::FILTER_TYPE_GLOBAL_CLASSIFICATION], 'int');
 
             if (!empty($tmp_filter)) {
 
@@ -1392,14 +1328,7 @@ class ProjectRepository {
 
         if (array_key_exists(self::FILTER_TYPE_CATEGORY, $this->filter)) {
 
-            $tmp_filter = $this->filter[self::FILTER_TYPE_CATEGORY];
-            if (is_array($tmp_filter)) {
-                $tmp_filter = ArrayUtil::toStringArray($tmp_filter);
-            } else if (is_string($tmp_filter)) {
-                $tmp_filter = ArrayUtil::toStringArray([$tmp_filter]);
-            } else {
-                $tmp_filter = [];
-            }
+            $tmp_filter = self::getFilter($this->filter[self::FILTER_TYPE_CATEGORY], 'string');
 
             if (!empty($tmp_filter)) {
 
@@ -1436,14 +1365,7 @@ class ProjectRepository {
         }
         else if (array_key_exists(self::FILTER_TYPE_GLOBAL_CATEGORY, $this->filter)) {
 
-            $tmp_filter = $this->filter[self::FILTER_TYPE_GLOBAL_CATEGORY];
-            if (is_array($tmp_filter)) {
-                $tmp_filter = ArrayUtil::toIntArray($tmp_filter);
-            } else if (is_int($tmp_filter)) {
-                $tmp_filter = ArrayUtil::toIntArray([$tmp_filter]);
-            } else {
-                $tmp_filter = [];
-            }
+            $tmp_filter = self::getFilter($this->filter[self::FILTER_TYPE_GLOBAL_CATEGORY], 'int');
 
             if (!empty($tmp_filter)) {
 
@@ -1680,6 +1602,40 @@ class ProjectRepository {
             'ph_addons' => $ph_addons,
             'ph' => $ph
         ];
+    }
+
+    public function fetchLocationQuantity(): array {
+
+        $query_parts = $this->createQueryParts();
+
+        if(array_key_exists('location', $query_parts)) {
+            unset($query_parts['location']);
+        }
+
+        $query = $this->prepareQueryParts($query_parts);
+
+        $query_select = 'SELECT 
+    
+        COALESCE(SHA1(`local_location`.`locality`), SHA1(-1)) AS `id`,
+        COUNT(DISTINCT `project`.`project_id`) AS `cnt`, `local_location`.`locality`
+
+        FROM `'.CONCLUDIS_TABLE_PROJECT.'` `project`  
+            
+        LEFT JOIN `'.CONCLUDIS_TABLE_PROJECT_LOCATION.'` `location` 
+        ON (`location`.`project_id` = `project`.`project_id` AND `location`.`source_id` = `project`.`source_id`) 
+            
+        LEFT JOIN `'.CONCLUDIS_TABLE_LOCAL_LOCATION.'` `local_location` 
+        ON (`location`.`location_id` = `local_location`.`location_id` AND `location`.`source_id` = `local_location`.`source_id`)
+                    
+        ' . (!empty($query['join']) ? implode(" \n", $query['join']) : '') . ' 
+        WHERE 1 
+        ' . (!empty($query['where']) ? 'AND ' . implode(' AND ', $query['where']) : '') . '
+        
+        GROUP BY COALESCE(SHA1(`local_location`.`locality`), SHA1(-1)) 
+        ORDER BY `cnt`, `local_location`.`locality` DESC';
+
+        return PDO::getInstance()->select($query_select, $query['ph']);
+
     }
 
     /**
@@ -3065,5 +3021,22 @@ class ProjectRepository {
         return $data;
     }
 
+    private static function getFilter($filter, string $type): array {
+
+        if (is_array($filter)) {
+            if($type === 'int') {
+                $filter = ArrayUtil::toIntArray($filter);
+            } else {
+                $filter = ArrayUtil::toStringArray($filter);
+            }
+        } else if (is_int($filter) && $type === 'int') {
+            $filter = ArrayUtil::toIntArray([$filter]);
+        } else if (is_string($filter) && $type === 'string') {
+            $filter = ArrayUtil::toStringArray([$filter]);
+        } else {
+            $filter = [];
+        }
+        return $filter;
+    }
 
 }
