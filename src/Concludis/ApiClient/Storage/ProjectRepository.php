@@ -1632,7 +1632,7 @@ class ProjectRepository {
         ' . (!empty($query['where']) ? 'AND ' . implode(' AND ', $query['where']) : '') . '
         
         GROUP BY COALESCE(SHA1(`local_location`.`locality`), SHA1(-1)), `local_location`.`locality` 
-        ORDER BY `cnt`, `local_location`.`locality` DESC';
+        ORDER BY `cnt` DESC, IF(`local_location`.`locality` IS NULL, 1, 0), `local_location`.`locality` DESC';
 
         return PDO::getInstance()->select($query_select, $query['ph']);
 
