@@ -1616,7 +1616,7 @@ class ProjectRepository {
 
         $query_select = 'SELECT 
     
-        COALESCE(SHA1(`local_location`.`locality`), SHA1(-1)) AS `id`,
+        IF(`local_location`.`locality` IS NULL, NULL, SHA1(`local_location`.`locality`)) AS `id`,
         COUNT(DISTINCT `project`.`project_id`) AS `cnt`, `local_location`.`locality` AS `name`
 
         FROM `'.CONCLUDIS_TABLE_PROJECT.'` `project`  
