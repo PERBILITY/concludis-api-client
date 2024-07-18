@@ -758,7 +758,7 @@ class ProjectRepository {
             if (!empty($tmp_filter)) {
 
                 $find_ids = array_values(array_diff($tmp_filter, [sha1('-1')]));
-                $find_others = in_array(sha1('-1'), $tmp_filter, true);
+                $find_others = in_array('-1', $tmp_filter, true);
 
                 $tmp_query_parts = [];
                 $placeholders = [];
