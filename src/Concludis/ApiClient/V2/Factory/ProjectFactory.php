@@ -589,8 +589,22 @@ class ProjectFactory {
         if(array_key_exists('years_of_experience', $data)){
             $v = $data['years_of_experience'];
             if($v !== null) {
+                $yoe_code = $v['code'] ?? null;
+                // global_id is used to display something like "1+ years" (for global_id=1)
+                // so we set it always to the min required experience
+                $yoe_global_id_code_map = [
+                    'less_than_one_year' => 0,
+                    'one_to_two_years' => 1,
+                    'two_to_five_years' => 2,
+                    'five_to_seven_years' => 5,
+                    'seven_to_ten_years' => 7,
+                    'ten_to_fifteen_years' => 10,
+                    'more_than_fifteen_years' => 15,
+                ];
+
                 $pdata['years_of_experience'] = new Element([
                     'source_id' => $source_id,
+                    'global_id' => $yoe_global_id_code_map[$yoe_code] ?? 0,
                     'id' => $v['id'],
                     'name' => $v['name']
                 ]);
