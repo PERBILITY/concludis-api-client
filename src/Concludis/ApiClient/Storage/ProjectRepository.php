@@ -1279,7 +1279,7 @@ class ProjectRepository {
                 }
 
                 if(!empty($tmp_query_parts)) {
-                    $query_parts['category'] = [
+                    $query_parts['classification'] = [
                         'where' => '(' . implode(' OR ', $tmp_query_parts) . ')',
                         'ph' => $placeholders
                     ];
