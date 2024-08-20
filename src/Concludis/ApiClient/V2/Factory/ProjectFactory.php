@@ -663,8 +663,10 @@ class ProjectFactory {
             $pdata['salary'] = $data['salary'];
         }
 
+        $indeed_enabled = 0;
         if(array_key_exists('indeed_enabled', $data) && is_int($data['indeed_enabled'])) {
             $pdata['indeed_enabled'] = $data['indeed_enabled'];
+            $indeed_enabled = $data['indeed_enabled'];
         }
 
 
@@ -770,6 +772,10 @@ class ProjectFactory {
                 'alternative_position_title' => $alternative_position_title,
                 'position_description' => $position_description
             ]);
+
+            if(array_key_exists('indeed_extended', $data) && $indeed_enabled === 2) {
+                $pdata['indeed_extended'] = (array)$data['indeed_extended'];
+            }
 
         }
 
