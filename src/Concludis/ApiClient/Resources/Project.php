@@ -290,6 +290,11 @@ class Project {
     public array $indeed_extended = [];
 
     /**
+     * @var string
+     */
+    public string $tone = 'formal';
+
+    /**
      * @var PositionInformation
      */
     public PositionInformation $position_information;
@@ -610,6 +615,10 @@ class Project {
 
         if(array_key_exists('indeed_extended', $data) && is_array($data['indeed_enabled'])) {
             $this->indeed_extended = $data['indeed_extended'];
+        }
+
+        if(array_key_exists('tone', $data) && is_string($data['tone'])) {
+            $this->tone = $data['tone'];
         }
 
     }

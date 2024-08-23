@@ -719,6 +719,14 @@ class ProjectFactory {
             $pdata['ba_is_published'] = (bool)$data['ba_published'];
         }
 
+        if(array_key_exists('indeed_extended', $data) && $indeed_enabled === 2) {
+            $pdata['indeed_extended'] = (array)$data['indeed_extended'];
+        }
+
+        if(array_key_exists('tone', $data) && is_string($data['tone'])){
+            $pdata['tone'] = $data['tone'];
+        }
+
 
 
         if(array_key_exists('ba_position_information', $data)) {
@@ -772,10 +780,6 @@ class ProjectFactory {
                 'alternative_position_title' => $alternative_position_title,
                 'position_description' => $position_description
             ]);
-
-            if(array_key_exists('indeed_extended', $data) && $indeed_enabled === 2) {
-                $pdata['indeed_extended'] = (array)$data['indeed_extended'];
-            }
 
         }
 
