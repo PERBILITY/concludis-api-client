@@ -66,7 +66,7 @@ class ProjectsGetEndpoint extends AbstractEndpoint {
         $data = [
             'id' => $project_id,
             'published' => self::PUBLISHED_PUBLIC_OR_INTERNAL,
-            'show' => ['locations', 'jobad_structured', 'ba_extended', 'indeed_extended', 'i18n']
+            'show' => ['locations', 'jobad_structured', 'jobad_purified', 'ba_extended', 'indeed_extended', 'i18n']
         ];
 
         $response = $this->client->call($endpoint, $data, 'GET');
@@ -90,7 +90,7 @@ class ProjectsGetEndpoint extends AbstractEndpoint {
         $endpoint = strtr($endpoint, $url_params);
 
         $data = [
-            'show' => ['locations', 'jobad_structured', 'ba_extended', 'indeed_extended', 'i18n']
+            'show' => ['locations', 'jobad_structured', 'jobad_purified', 'ba_extended', 'indeed_extended', 'i18n']
         ];
 
         if(array_key_exists(self::FILTER_TYPE_PAGINATION, $this->filter)) {
