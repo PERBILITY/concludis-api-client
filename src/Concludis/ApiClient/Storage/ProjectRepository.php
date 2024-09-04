@@ -2866,6 +2866,26 @@ class ProjectRepository {
             return;
         }
 
+        // add meta data to containers
+        $postion_title_translations = $project->getPropTranslations('position_title');
+        foreach($postion_title_translations as $locale => $position_title) {
+            $containers[] = new JobadContainer([
+                'source_id' => $project->source_id,
+                'project_id' => $project->id,
+                'datafield_id' => 2147483647, // max int 32 bit
+                'locale' => $locale,
+                'type' => '.position_title',
+                'container_type' => 'text',
+                'content_external' => (string)$position_title,
+                'content_internal' => ''
+            ]);
+        }
+
+        // todo: create real diff to decide if we should insert update or delete
+        //$existing_containers = self::fetchJobadContainers($project, true);
+
+
+
         $pdo = PDO::getInstance();
 
         $sql = 'DELETE FROM `'.CONCLUDIS_TABLE_PROJECT_AD_CONTAINER.'` 
@@ -2902,12 +2922,13 @@ class ProjectRepository {
         }
     }
 
+
     /**
      * @param Project $project
+     * @param bool $include_meta
      * @return JobadContainer[]
-     * @throws Exception
      */
-    public static function fetchJobadContainers(Project $project): array
+    public static function fetchJobadContainers(Project $project, bool $include_meta = false): array
     {
 
         $pdo = PDO::getInstance();
@@ -2921,6 +2942,11 @@ class ProjectRepository {
         ]);
         $r = [];
         foreach($res as $d) {
+            // exclude functional meta fields
+            // maybe it is faster to do this by where not like... in query, but we suspect this is faster.
+            if(!$include_meta && str_starts_with($d['type'], '.')) {
+                continue;
+            }
             $r[] = new JobadContainer($d);
         }
 
