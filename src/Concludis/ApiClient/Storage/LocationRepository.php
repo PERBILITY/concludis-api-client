@@ -7,6 +7,7 @@ namespace Concludis\ApiClient\Storage;
 use Concludis\ApiClient\Config\Baseconfig;
 use Concludis\ApiClient\Database\PDO;
 use Concludis\ApiClient\Resources\Location;
+use Concludis\ApiClient\Resources\Place;
 use Exception;
 
 class LocationRepository {
@@ -333,4 +334,20 @@ class LocationRepository {
         }
 
     }
+
+    /**
+     * @param Location $location
+     * @return Place|null
+     * @throws Exception
+     */
+    public static function fetchPlaceByLocation(Location $location): ? Place {
+
+        return PlaceRepository::factory()
+            ->addFilter(PlaceRepository::FILTER_TYPE_COUNTRY_CODE, $location->country_code)
+            ->addFilter(PlaceRepository::FILTER_TYPE_POSTAL_CODE, $location->postal_code)
+            ->addFilter(PlaceRepository::FILTER_TYPE_PLACE_NAME, $location->locality)
+            ->fetchOne();
+
+    }
+
 }

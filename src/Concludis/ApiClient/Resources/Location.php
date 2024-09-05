@@ -251,5 +251,12 @@ class Location {
         return implode(', ', $parts);
     }
 
+    /**
+     * @throws Exception
+     */
+    public function getPlace(): ?Place {
+        return LocationRepository::fetchPlaceByLocation($this);
+    }
+
 
 }
