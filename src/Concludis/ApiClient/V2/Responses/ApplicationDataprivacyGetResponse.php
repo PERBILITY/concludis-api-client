@@ -4,6 +4,7 @@ namespace Concludis\ApiClient\V2\Responses;
 
 use Concludis\ApiClient\Common\ApiResponse;
 use Concludis\ApiClient\Common\EndpointResponse;
+use Concludis\ApiClient\Util\ArrayUtil;
 use Concludis\ApiClient\V2\Endpoints\ApplicationDataprivacyGetEndpoint;
 
 class ApplicationDataprivacyGetResponse extends EndpointResponse {
@@ -29,7 +30,7 @@ class ApplicationDataprivacyGetResponse extends EndpointResponse {
 
         if ($response->success) {
             $this->dataprivacy_statement = (string)$response->data['dataprivacy_statement'];
-            $this->dp_companies = (array)$response->data['dp_companies'];
+            $this->dp_companies = ArrayUtil::toIntArray((array)$response->data['dp_companies']);
         }
     }
 }

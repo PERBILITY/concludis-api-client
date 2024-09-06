@@ -8,6 +8,10 @@ use Concludis\ApiClient\V2\Endpoints\ApplicationSetupGetEndpoint;
 
 class ApplicationSetupGetResponse extends EndpointResponse {
 
+    /**
+     * the full application setup as array
+     * @var array|null
+     */
     public ?array $setup = null;
 
     /**

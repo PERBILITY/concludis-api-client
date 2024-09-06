@@ -19,9 +19,13 @@ use Concludis\ApiClient\Storage\BoardRepository;
 use Concludis\ApiClient\Util\ArrayUtil;
 use Concludis\ApiClient\Util\CliUtil;
 use Concludis\ApiClient\V2\Endpoints\ApplicationApplyPostEndpoint;
+use Concludis\ApiClient\V2\Endpoints\ApplicationDataprivacyGetEndpoint;
+use Concludis\ApiClient\V2\Endpoints\ApplicationSetupGetEndpoint;
 use Concludis\ApiClient\V2\Endpoints\BoardsGetEndpoint;
 use Concludis\ApiClient\V2\Endpoints\ProjectsGetEndpoint;
 use Concludis\ApiClient\V2\Responses\ApplicationApplyPostResponse;
+use Concludis\ApiClient\V2\Responses\ApplicationDataprivacyGetResponse;
+use Concludis\ApiClient\V2\Responses\ApplicationSetupGetResponse;
 use Exception;
 use RuntimeException;
 
@@ -582,6 +586,17 @@ class Client extends AbstractClient {
         }
     }
 
+    /**
+     * push an application to ATS
+     *
+     * @param int $project_id
+     * @param array $location_ids
+     * @param int $source_id
+     * @param bool $is_internal
+     * @param array $candidate
+     * @param array $options
+     * @return ApplicationApplyPostResponse
+     */
     public function pushApplication(int $project_id, array $location_ids, int $source_id, bool $is_internal, array $candidate, array $options): ApplicationApplyPostResponse {
 
         $endpoint = new ApplicationApplyPostEndpoint($this);
@@ -591,6 +606,33 @@ class Client extends AbstractClient {
         $endpoint->addParam(ApplicationApplyPostEndpoint::PARAM_KEY_IS_INTERNAL, $is_internal);
         $endpoint->addParam(ApplicationApplyPostEndpoint::PARAM_KEY_CANDIDATE, $candidate);
         $endpoint->addParam(ApplicationApplyPostEndpoint::PARAM_KEY_OPTIONS, $options);
+
+        return $endpoint->call();
+    }
+
+    /**
+     * fetch the full application setup required for creating a custom application form that respects all ATS user settings.
+     *
+     * @param int $project_id
+     * @param bool $is_internal
+     * @param int $jobboard_id
+     * @return ApplicationSetupGetResponse
+     */
+    public function fetchApplicationSetup(int $project_id, bool $is_internal, int $jobboard_id = 0): ApplicationSetupGetResponse {
+
+        $endpoint = new ApplicationSetupGetEndpoint($this);
+        $endpoint->addParam(ApplicationSetupGetEndpoint::PARAM_KEY_PROJECT_ID, $project_id);
+        $endpoint->addParam(ApplicationSetupGetEndpoint::PARAM_KEY_IS_INTERNAL, $is_internal);
+        $endpoint->addParam(ApplicationSetupGetEndpoint::PARAM_KEY_JOBBOARD_ID, $jobboard_id);
+
+        return $endpoint->call();
+    }
+
+    public function fetchDataPrivacyStatement(int $project_id, array $location_ids): ApplicationDataprivacyGetResponse {
+
+        $endpoint = new ApplicationDataprivacyGetEndpoint($this);
+        $endpoint->addParam(ApplicationDataprivacyGetEndpoint::PARAM_KEY_PROJECT_ID, $project_id);
+        $endpoint->addParam(ApplicationDataprivacyGetEndpoint::PARAM_KEY_LOCATION_IDS, $location_ids);
 
         return $endpoint->call();
     }

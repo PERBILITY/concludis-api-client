@@ -6,6 +6,8 @@ namespace Concludis\ApiClient\V2;
 
 use Concludis\ApiClient\Config\Baseconfig;
 use Concludis\ApiClient\V2\Client\Client;
+use Concludis\ApiClient\V2\Endpoints\ApplicationDataprivacyGetEndpoint;
+use Concludis\ApiClient\V2\Endpoints\ApplicationSetupGetEndpoint;
 use Concludis\ApiClient\V2\Endpoints\BoardsGetEndpoint;
 use Concludis\ApiClient\V2\Endpoints\CompaniesCompanyGetEndpoint;
 use Concludis\ApiClient\V2\Endpoints\CompaniesCompanyPatchEndpoint;
@@ -61,6 +63,13 @@ class Api {
     }
     public function BoardsGetEndpoint(): BoardsGetEndpoint {
         return new BoardsGetEndpoint($this->client);
+    }
+
+    public function ApplicationSetupGetEndpoint(): ApplicationSetupGetEndpoint {
+        return new ApplicationSetupGetEndpoint($this->client);
+    }
+    public function ApplicationDataprivacyGetEndpoint(): ApplicationDataprivacyGetEndpoint {
+        return new ApplicationDataprivacyGetEndpoint($this->client);
     }
 
 }

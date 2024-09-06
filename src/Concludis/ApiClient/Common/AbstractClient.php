@@ -7,6 +7,8 @@ namespace Concludis\ApiClient\Common;
 use Concludis\ApiClient\Config\Source;
 use Concludis\ApiClient\Resources\Project;
 use Concludis\ApiClient\V2\Responses\ApplicationApplyPostResponse;
+use Concludis\ApiClient\V2\Responses\ApplicationDataprivacyGetResponse;
+use Concludis\ApiClient\V2\Responses\ApplicationSetupGetResponse;
 use Exception;
 
 abstract class AbstractClient {
@@ -88,6 +90,19 @@ abstract class AbstractClient {
      */
     abstract public function pushApplication(int $project_id, array $location_ids, int $source_id, bool $is_internal, array $candidate, array $options): ApplicationApplyPostResponse;
 
+    /**
+     * @param int $project_id
+     * @param bool $is_internal
+     * @param int $jobboard_id
+     * @return ApplicationSetupGetResponse
+     */
+    abstract public function fetchApplicationSetup(int $project_id, bool $is_internal, int $jobboard_id = 0): ApplicationSetupGetResponse;
 
+    /**
+     * @param int $project_id
+     * @param array $location_ids
+     * @return ApplicationDataprivacyGetResponse
+     */
+    abstract public function fetchDataPrivacyStatement(int $project_id, array $location_ids): ApplicationDataprivacyGetResponse;
 
 }

@@ -17,6 +17,8 @@ use Concludis\ApiClient\Resources\Project;
 use Concludis\ApiClient\Util\CliUtil;
 use Concludis\ApiClient\V1\Endpoints\ProjectEndpoint as V1ProjectEndpoint;
 use Concludis\ApiClient\V2\Responses\ApplicationApplyPostResponse;
+use Concludis\ApiClient\V2\Responses\ApplicationDataprivacyGetResponse;
+use Concludis\ApiClient\V2\Responses\ApplicationSetupGetResponse;
 use Exception;
 use RuntimeException;
 
@@ -294,5 +296,13 @@ class Client extends AbstractClient {
 
     public function fetchProject(int $project_id): Project {
         throw new RuntimeException('fetchProject not implemented!');
+    }
+
+    public function fetchApplicationSetup(int $project_id, bool $is_internal, int $jobboard_id = 0): ApplicationSetupGetResponse {
+        throw new RuntimeException('fetchApplicationSetup not implemented!');
+    }
+
+    public function fetchDataPrivacyStatement(int $project_id, array $location_ids): ApplicationDataprivacyGetResponse {
+        throw new RuntimeException('fetchDataPrivacyStatement not implemented!');
     }
 }
