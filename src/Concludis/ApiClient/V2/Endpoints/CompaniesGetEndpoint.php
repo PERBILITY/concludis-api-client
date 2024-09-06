@@ -20,16 +20,10 @@ class CompaniesGetEndpoint extends AbstractEndpoint {
     private const FILTER_TYPE_PARENT_ID = 'parent_id';
     private const FILTER_TYPE_LOCATION_ID = 'location_id';
 
-    private string $locale = 'de_DE';
-
     private array $filter = [];
 
     public function __construct(Client $client) {
         parent::__construct($client);
-    }
-
-    public function locale(string $locale): void {
-        $this->locale = $locale;
     }
 
 

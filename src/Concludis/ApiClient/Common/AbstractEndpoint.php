@@ -11,6 +11,8 @@ abstract class AbstractEndpoint {
      */
     protected AbstractClient $client;
 
+    protected string $locale = 'de_DE';
+
     public function __construct(AbstractClient $client) {
         $this->client = $client;
     }
@@ -20,5 +22,13 @@ abstract class AbstractEndpoint {
      */
     public function client(): AbstractClient {
         return $this->client;
+    }
+
+    /**
+     * @param string $locale
+     * @return void
+     */
+    public function setLocale(string $locale): void {
+        $this->locale = $locale;
     }
 }

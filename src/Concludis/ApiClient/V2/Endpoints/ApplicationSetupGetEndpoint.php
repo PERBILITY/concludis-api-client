@@ -15,8 +15,6 @@ class ApplicationSetupGetEndpoint extends AbstractEndpoint {
     public const PARAM_KEY_JOBBOARD_ID = 'jobboard_id';
     public const PARAM_KEY_IS_INTERNAL = 'is_internal';
 
-    private string $locale = 'de_DE';
-
     public function __construct(Client $client) {
         parent::__construct($client);
     }

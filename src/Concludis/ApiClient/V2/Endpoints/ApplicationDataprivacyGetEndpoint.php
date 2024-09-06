@@ -14,8 +14,6 @@ class ApplicationDataprivacyGetEndpoint extends AbstractEndpoint {
     public const PARAM_KEY_PROJECT_ID = 'project_id';
     public const PARAM_KEY_LOCATION_IDS = 'location_ids';
 
-    private string $locale = 'de_DE';
-
     public function __construct(Client $client) {
         parent::__construct($client);
     }

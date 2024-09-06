@@ -618,9 +618,12 @@ class Client extends AbstractClient {
      * @param int $jobboard_id
      * @return ApplicationSetupGetResponse
      */
-    public function fetchApplicationSetup(int $project_id, bool $is_internal, int $jobboard_id = 0): ApplicationSetupGetResponse {
+    public function fetchApplicationSetup(int $project_id, bool $is_internal, int $jobboard_id = 0, ?string $locale = null): ApplicationSetupGetResponse {
 
         $endpoint = new ApplicationSetupGetEndpoint($this);
+        if($locale !== null) {
+            $endpoint->setLocale($locale);
+        }
         $endpoint->addParam(ApplicationSetupGetEndpoint::PARAM_KEY_PROJECT_ID, $project_id);
         $endpoint->addParam(ApplicationSetupGetEndpoint::PARAM_KEY_IS_INTERNAL, $is_internal);
         $endpoint->addParam(ApplicationSetupGetEndpoint::PARAM_KEY_JOBBOARD_ID, $jobboard_id);
@@ -628,9 +631,12 @@ class Client extends AbstractClient {
         return $endpoint->call();
     }
 
-    public function fetchDataPrivacyStatement(int $project_id, array $location_ids): ApplicationDataprivacyGetResponse {
+    public function fetchDataPrivacyStatement(int $project_id, array $location_ids, ?string $locale = null): ApplicationDataprivacyGetResponse {
 
         $endpoint = new ApplicationDataprivacyGetEndpoint($this);
+        if($locale !== null) {
+            $endpoint->setLocale($locale);
+        }
         $endpoint->addParam(ApplicationDataprivacyGetEndpoint::PARAM_KEY_PROJECT_ID, $project_id);
         $endpoint->addParam(ApplicationDataprivacyGetEndpoint::PARAM_KEY_LOCATION_IDS, $location_ids);
 

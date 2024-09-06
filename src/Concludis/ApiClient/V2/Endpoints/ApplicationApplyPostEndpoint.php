@@ -18,8 +18,6 @@ class ApplicationApplyPostEndpoint extends AbstractEndpoint {
     public const PARAM_KEY_CANDIDATE = 'candidate';
     public const PARAM_KEY_OPTIONS = 'options';
 
-    private string $locale = 'de_DE';
-
     public function __construct(Client $client) {
         parent::__construct($client);
     }

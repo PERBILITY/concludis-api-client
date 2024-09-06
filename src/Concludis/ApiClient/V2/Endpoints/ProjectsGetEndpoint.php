@@ -19,16 +19,10 @@ class ProjectsGetEndpoint extends AbstractEndpoint {
     public const PUBLISHED_PUBLIC = 2;
     public const PUBLISHED_INTERNAL = 3;
 
-    private string $locale = 'de_DE';
-
     private array $filter = [];
 
     public function __construct(Client $client) {
         parent::__construct($client);
-    }
-
-    public function locale(string $locale): void {
-        $this->locale = $locale;
     }
 
 

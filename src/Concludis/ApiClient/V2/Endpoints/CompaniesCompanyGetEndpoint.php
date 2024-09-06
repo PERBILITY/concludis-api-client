@@ -16,8 +16,6 @@ class CompaniesCompanyGetEndpoint extends AbstractEndpoint {
     public const PARAM_KEY_IDENTIFIER = 'identifier';
     public const PARAM_KEY_SHOW = 'show';
 
-    private string $locale = 'de_DE';
-
 
     public function __construct(Client $client) {
         parent::__construct($client);
@@ -30,7 +28,6 @@ class CompaniesCompanyGetEndpoint extends AbstractEndpoint {
             self::PARAM_KEY_SHOW => ['cast' => 'string']
         ];
     }
-
 
     public function locale(string $locale): self {
         $this->locale = $locale;

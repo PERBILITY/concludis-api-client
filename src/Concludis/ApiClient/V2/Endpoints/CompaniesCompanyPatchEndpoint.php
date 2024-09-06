@@ -30,8 +30,6 @@ class CompaniesCompanyPatchEndpoint extends AbstractEndpoint {
     public const PARAM_KEY_XING_PROFILE_URL = 'xing_profile_url';
     public const PARAM_KEY_INDUSTRY_ID = 'industry_id';
 
-    private string $locale = 'de_DE';
-
     public function __construct(Client $client) {
         parent::__construct($client);
     }

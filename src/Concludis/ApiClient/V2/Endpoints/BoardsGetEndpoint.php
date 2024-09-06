@@ -9,14 +9,7 @@ class BoardsGetEndpoint extends AbstractEndpoint {
 
     private const FILTER_TYPE_PAGINATION = 'pagination';
 
-    private string $locale = 'de_DE';
-
     private array $filter = [];
-
-
-    public function locale(string $locale): void {
-        $this->locale = $locale;
-    }
 
 
     public function paginate(int $page, int $items_per_page = 5): self {
