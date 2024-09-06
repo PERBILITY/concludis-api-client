@@ -96,13 +96,13 @@ abstract class AbstractClient {
      * @param int $jobboard_id
      * @return ApplicationSetupGetResponse
      */
-    abstract public function fetchApplicationSetup(int $project_id, bool $is_internal, int $jobboard_id = 0): ApplicationSetupGetResponse;
+    abstract public function fetchApplicationSetup(int $project_id, bool $is_internal, int $jobboard_id = 0, ?string $locale = null): ApplicationSetupGetResponse;
 
     /**
      * @param int $project_id
      * @param array $location_ids
      * @return ApplicationDataprivacyGetResponse
      */
-    abstract public function fetchDataPrivacyStatement(int $project_id, array $location_ids): ApplicationDataprivacyGetResponse;
+    abstract public function fetchDataPrivacyStatement(int $project_id, array $location_ids, ?string $locale = null): ApplicationDataprivacyGetResponse;
 
 }

@@ -298,11 +298,11 @@ class Client extends AbstractClient {
         throw new RuntimeException('fetchProject not implemented!');
     }
 
-    public function fetchApplicationSetup(int $project_id, bool $is_internal, int $jobboard_id = 0): ApplicationSetupGetResponse {
+    public function fetchApplicationSetup(int $project_id, bool $is_internal, int $jobboard_id = 0, ?string $locale = null): ApplicationSetupGetResponse {
         throw new RuntimeException('fetchApplicationSetup not implemented!');
     }
 
-    public function fetchDataPrivacyStatement(int $project_id, array $location_ids): ApplicationDataprivacyGetResponse {
+    public function fetchDataPrivacyStatement(int $project_id, array $location_ids, ?string $locale = null): ApplicationDataprivacyGetResponse {
         throw new RuntimeException('fetchDataPrivacyStatement not implemented!');
     }
 }
