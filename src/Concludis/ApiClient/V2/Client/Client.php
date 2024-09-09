@@ -39,8 +39,6 @@ use Concludis\ApiClient\V2\Responses\ApplicationApplyPostResponse;
 use Concludis\ApiClient\V2\Responses\ApplicationDataprivacyGetResponse;
 use Concludis\ApiClient\V2\Responses\ApplicationSetupGetResponse;
 use Concludis\ApiClient\V2\Responses\CandidateAppicationsGetResponse;
-use Concludis\ApiClient\V2\Responses\CandidateFilePostResponse;
-use Concludis\ApiClient\V2\Responses\CandidateProfileimageDeleteResponse;
 use Exception;
 use RuntimeException;
 
