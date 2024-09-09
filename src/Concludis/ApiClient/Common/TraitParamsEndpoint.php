@@ -37,6 +37,9 @@ trait TraitParamsEndpoint {
                 return (object)$val;
             }
             if($cast === 'array') {
+                if(!is_array($val)) {
+                    return [];
+                }
                 return (array)$val;
             }
         }
@@ -57,6 +60,17 @@ trait TraitParamsEndpoint {
         $this->params[$param_key] = $this->castParam($def, $param_val);
 
         return $this;
+    }
+
+    public function getParam(string $param_key) {
+
+        $params_definition = $this->paramsDefinition();
+
+        if(!array_key_exists($param_key, $params_definition)) {
+            return null;
+        }
+
+        return $this->params[$param_key] ?? null;
     }
 
 }

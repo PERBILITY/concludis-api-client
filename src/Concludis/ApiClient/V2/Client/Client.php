@@ -14,6 +14,7 @@ use Concludis\ApiClient\Exception\CurlException;
 use Concludis\ApiClient\Exception\HttpException;
 use Concludis\ApiClient\Exception\JsonException;
 use Concludis\ApiClient\Exception\ApiRuntimeException;
+use Concludis\ApiClient\Resources\File;
 use Concludis\ApiClient\Resources\Project;
 use Concludis\ApiClient\Storage\BoardRepository;
 use Concludis\ApiClient\Util\ArrayUtil;
@@ -22,10 +23,24 @@ use Concludis\ApiClient\V2\Endpoints\ApplicationApplyPostEndpoint;
 use Concludis\ApiClient\V2\Endpoints\ApplicationDataprivacyGetEndpoint;
 use Concludis\ApiClient\V2\Endpoints\ApplicationSetupGetEndpoint;
 use Concludis\ApiClient\V2\Endpoints\BoardsGetEndpoint;
+use Concludis\ApiClient\V2\Endpoints\CandidateApplicationsGetEndpoint;
+use Concludis\ApiClient\V2\Endpoints\CandidateFileDeleteEndpoint;
+use Concludis\ApiClient\V2\Endpoints\CandidateFileGetEndpoint;
+use Concludis\ApiClient\V2\Endpoints\CandidateFilePostEndpoint;
+use Concludis\ApiClient\V2\Endpoints\CandidateHrjsonGetEndpoint;
+use Concludis\ApiClient\V2\Endpoints\CandidateHrjsonPostEndpoint;
+use Concludis\ApiClient\V2\Endpoints\CandidateIncomingmessagePostEndpoint;
+use Concludis\ApiClient\V2\Endpoints\CandidateMessagePatchEndpoint;
+use Concludis\ApiClient\V2\Endpoints\CandidateMessagesGetEndpoint;
+use Concludis\ApiClient\V2\Endpoints\CandidateProfileimageDeleteEndpoint;
+use Concludis\ApiClient\V2\Endpoints\CandidateProfileimagePostEndpoint;
 use Concludis\ApiClient\V2\Endpoints\ProjectsGetEndpoint;
 use Concludis\ApiClient\V2\Responses\ApplicationApplyPostResponse;
 use Concludis\ApiClient\V2\Responses\ApplicationDataprivacyGetResponse;
 use Concludis\ApiClient\V2\Responses\ApplicationSetupGetResponse;
+use Concludis\ApiClient\V2\Responses\CandidateAppicationsGetResponse;
+use Concludis\ApiClient\V2\Responses\CandidateFilePostResponse;
+use Concludis\ApiClient\V2\Responses\CandidateProfileimageDeleteResponse;
 use Exception;
 use RuntimeException;
 
@@ -586,6 +601,24 @@ class Client extends AbstractClient {
         }
     }
 
+    private function cliHandleException(Exception $e): void {
+        CliUtil::output('');
+        CliUtil::output('uups, someting went wrong: ' . $e->getMessage());
+
+        if($e instanceof ApiRuntimeException) {
+            foreach($e->suberrors as $suberror) {
+                try {
+                    $msg = (is_string($suberror) ? $suberror : json_encode($suberror, JSON_THROW_ON_ERROR));
+                    CliUtil::output($msg);
+                } catch (\JsonException) {
+                }
+            }
+        }
+        CliUtil::output('');
+
+        // print_r($e);
+    }
+
     /**
      * push an application to ATS
      *
@@ -616,6 +649,7 @@ class Client extends AbstractClient {
      * @param int $project_id
      * @param bool $is_internal
      * @param int $jobboard_id
+     * @param string|null $locale
      * @return ApplicationSetupGetResponse
      */
     public function fetchApplicationSetup(int $project_id, bool $is_internal, int $jobboard_id = 0, ?string $locale = null): ApplicationSetupGetResponse {
@@ -643,21 +677,222 @@ class Client extends AbstractClient {
         return $endpoint->call();
     }
 
-    private function cliHandleException(Exception $e): void {
-        CliUtil::output('');
-        CliUtil::output('uups, someting went wrong: ' . $e->getMessage());
+    public function fetchCandidateApplications(int $candidate_id): CandidateAppicationsGetResponse  {
 
-        if($e instanceof ApiRuntimeException) {
-            foreach($e->suberrors as $suberror) {
-                try {
-                    $msg = (is_string($suberror) ? $suberror : json_encode($suberror, JSON_THROW_ON_ERROR));
-                    CliUtil::output($msg);
-                } catch (\JsonException) {
-                }
-            }
+        $endpoint = new CandidateApplicationsGetEndpoint($this);
+        $endpoint->addParam(CandidateApplicationsGetEndpoint::PARAM_KEY_CANDIDATE_ID, $candidate_id);
+        return $endpoint->call();
+    }
+
+    /**
+     * @param int $candidate_id
+     * @param int $file_id
+     * @return void
+     * @throws Exception
+     */
+    public function deleteCandidateFile(int $candidate_id, int $file_id): void {
+
+        $endpoint = new CandidateFileDeleteEndpoint($this);
+        $endpoint->addParam(CandidateFileDeleteEndpoint::PARAM_KEY_CANDIDATE_ID, $candidate_id);
+        $endpoint->addParam(CandidateFileDeleteEndpoint::PARAM_KEY_FILE_ID, $file_id);
+        $response = $endpoint->call();
+
+        $err = $response->error();
+        if($err !== null) {
+            throw $err->exception;
         }
-        CliUtil::output('');
+    }
 
-        // print_r($e);
+    /**
+     * @param int $candidate_id
+     * @param int $file_id
+     * @return File
+     * @throws Exception
+     */
+    public function getCandidateFile(int $candidate_id, int $file_id): File  {
+        $endpoint = new CandidateFileGetEndpoint($this);
+        $endpoint->addParam(CandidateFileGetEndpoint::PARAM_KEY_CANDIDATE_ID, $candidate_id);
+        $endpoint->addParam(CandidateFileGetEndpoint::PARAM_KEY_FILE_ID, $file_id);
+        $response = $endpoint->call();
+
+        $err = $response->error();
+        if($err !== null) {
+            throw $err->exception;
+        }
+
+        if($response->file === null) {
+            throw new RuntimeException('File not found');
+        }
+
+        return $response->file;
+    }
+
+    /**
+     * @param int $candidate_id
+     * @param File $file
+     * @param array|null $meta
+     * @return File
+     * @throws Exception
+     */
+    public function postCandidateFile(int $candidate_id, File $file, ?array $meta = null): File {
+        if(empty($file->content)) {
+            throw new RuntimeException('File content is empty');
+        }
+        if(empty($file->name)) {
+            throw new RuntimeException('File name is empty');
+        }
+        $endpoint = new CandidateFilePostEndpoint($this);
+        $endpoint->addParam(CandidateFilePostEndpoint::PARAM_KEY_CANDIDATE_ID, $candidate_id);
+        $endpoint->addParam(CandidateFilePostEndpoint::PARAM_KEY_FILE_NAME, $file->name);
+        $endpoint->addParam(CandidateFilePostEndpoint::PARAM_KEY_FILE_TYPE, $file->mime_type);
+        $endpoint->addParam(CandidateFilePostEndpoint::PARAM_KEY_FILE_CONTENT, $file->content);
+        if(!empty($meta)) {
+            $endpoint->addParam(CandidateFilePostEndpoint::PARAM_KEY_FILE_META, $meta);
+        }
+        $response = $endpoint->call();
+
+        $err = $response->error();
+        if($err !== null) {
+            throw $err->exception;
+        }
+
+        if($response->file === null) {
+            throw new RuntimeException('Something went wrong on postCandidateFile');
+        }
+
+        return $response->file;
+    }
+
+    /**
+     * @param int $candidate_id
+     * @return array
+     * @throws Exception
+     */
+    public function getCandidateHrjson(int $candidate_id): array {
+        $endpoint = new CandidateHrjsonGetEndpoint($this);
+        $endpoint->addParam(CandidateHrjsonGetEndpoint::PARAM_KEY_CANDIDATE_ID, $candidate_id);
+        $response = $endpoint->call();
+
+        $err = $response->error();
+        if($err !== null) {
+            throw $err->exception;
+        }
+
+        if($response->candidate === null) {
+            throw new RuntimeException('Cannot read candidate from ATS');
+        }
+
+        return $response->candidate;
+    }
+
+    /**
+     * @param array $candidate
+     * @return void
+     * @throws Exception
+     */
+    public function postCandidateHrjson(array $candidate): void {
+
+        $endpoint = new CandidateHrjsonPostEndpoint($this);
+        $endpoint->addParam(CandidateHrjsonPostEndpoint::PARAM_KEY_CANDIDATE, $candidate);
+        $response = $endpoint->call();
+
+        $err = $response->error();
+        if($err !== null) {
+            throw $err->exception;
+        }
+    }
+
+    /**
+     * @param int $candidate_id
+     * @param string $message
+     * @return void
+     * @throws Exception
+     */
+    public function postCandidateIncomingmessage(int $candidate_id, string $message): void {
+        $endpoint = new CandidateIncomingmessagePostEndpoint($this);
+        $endpoint->addParam(CandidateIncomingmessagePostEndpoint::PARAM_KEY_CANDIDATE_ID, $candidate_id);
+        $endpoint->addParam(CandidateIncomingmessagePostEndpoint::PARAM_KEY_MESSAGE, $message);
+        $response = $endpoint->call();
+
+        $err = $response->error();
+        if($err !== null) {
+            throw $err->exception;
+        }
+    }
+
+    /**
+     * @param int $candidate_id
+     * @param int $message_id
+     * @param string $action
+     * @return void
+     * @throws Exception
+     */
+    public function patchCandidateMessage(int $candidate_id, int $message_id, string $action): void {
+        $endpoint = new CandidateMessagePatchEndpoint($this);
+        $endpoint->addParam(CandidateMessagePatchEndpoint::PARAM_KEY_CANDIDATE_ID, $candidate_id);
+        $endpoint->addParam(CandidateMessagePatchEndpoint::PARAM_KEY_MESSAGE_ID, $message_id);
+        $endpoint->addParam(CandidateMessagePatchEndpoint::PARAM_KEY_ACTION, $action);
+        $response = $endpoint->call();
+
+        $err = $response->error();
+        if($err !== null) {
+            throw $err->exception;
+        }
+    }
+
+    /**
+     * @param int $candidate_id
+     * @return array
+     * @throws Exception
+     */
+    public function getCandidateMessages(int $candidate_id): array {
+        $endpoint = new CandidateMessagesGetEndpoint($this);
+        $endpoint->addParam(CandidateMessagesGetEndpoint::PARAM_KEY_CANDIDATE_ID, $candidate_id);
+        $response = $endpoint->call();
+
+        $err = $response->error();
+        if($err !== null) {
+            throw $err->exception;
+        }
+
+        if($response->messages === null) {
+            throw new RuntimeException('Cannot read messages from ATS');
+        }
+        return $response->messages;
+    }
+
+    /**
+     * @param int $candidate_id
+     * @return void
+     * @throws Exception
+     */
+    public function deleteCandidateProfileimage(int $candidate_id): void {
+        $endpoint = new CandidateProfileimageDeleteEndpoint($this);
+        $endpoint->addParam(CandidateProfileimageDeleteEndpoint::PARAM_KEY_CANDIDATE_ID, $candidate_id);
+        $response = $endpoint->call();
+
+        $err = $response->error();
+        if($err !== null) {
+            throw $err->exception;
+        }
+    }
+
+    public function postCandidateProfileimage(int $candidate_id, File $file): File {
+        $endpoint = new CandidateProfileimagePostEndpoint($this);
+        $endpoint->addParam(CandidateProfileimagePostEndpoint::PARAM_KEY_CANDIDATE_ID, $candidate_id);
+        $endpoint->addParam(CandidateProfileimagePostEndpoint::PARAM_KEY_FILE_MIME, $file->mime_type);
+        $endpoint->addParam(CandidateProfileimagePostEndpoint::PARAM_KEY_FILE_CONTENT, $file->content);
+        $response = $endpoint->call();
+
+        $err = $response->error();
+        if($err !== null) {
+            throw $err->exception;
+        }
+
+        if($response->file === null) {
+            throw new RuntimeException('Something went wrong on postCandidateProfileimage');
+        }
+
+        return $response->file;
     }
 }

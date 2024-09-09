@@ -13,12 +13,14 @@ use Concludis\ApiClient\Database\PDO;
 use Concludis\ApiClient\Exception\CurlException;
 use Concludis\ApiClient\Exception\HttpException;
 use Concludis\ApiClient\Exception\JsonException;
+use Concludis\ApiClient\Resources\File;
 use Concludis\ApiClient\Resources\Project;
 use Concludis\ApiClient\Util\CliUtil;
 use Concludis\ApiClient\V1\Endpoints\ProjectEndpoint as V1ProjectEndpoint;
 use Concludis\ApiClient\V2\Responses\ApplicationApplyPostResponse;
 use Concludis\ApiClient\V2\Responses\ApplicationDataprivacyGetResponse;
 use Concludis\ApiClient\V2\Responses\ApplicationSetupGetResponse;
+use Concludis\ApiClient\V2\Responses\CandidateAppicationsGetResponse;
 use Exception;
 use RuntimeException;
 
@@ -304,5 +306,49 @@ class Client extends AbstractClient {
 
     public function fetchDataPrivacyStatement(int $project_id, array $location_ids, ?string $locale = null): ApplicationDataprivacyGetResponse {
         throw new RuntimeException('fetchDataPrivacyStatement not implemented!');
+    }
+
+    public function fetchCandidateApplications(int $candidate_id): CandidateAppicationsGetResponse {
+        throw new RuntimeException('fetchCandidateApplications not implemented!');
+    }
+
+    public function deleteCandidateFile(int $candidate_id, int $file_id): void {
+        throw new RuntimeException('deleteCandidateFile not implemented!');
+    }
+
+    public function getCandidateFile(int $candidate_id, int $file_id): File {
+        throw new RuntimeException('getCandidateFile not implemented!');
+    }
+
+    public function postCandidateFile(int $candidate_id, File $file, ?array $meta = null): File {
+        throw new RuntimeException('postCandidateFile not implemented!');
+    }
+
+    public function getCandidateHrjson(int $candidate_id): array {
+        throw new RuntimeException('getCandidateHrjson not implemented!');
+    }
+
+    public function postCandidateHrjson(array $candidate): void {
+        throw new RuntimeException('postCandidateHrjson not implemented!');
+    }
+
+    public function postCandidateIncomingmessage(int $candidate_id, string $message): void {
+        throw new RuntimeException('postCandidateIncomingmessage not implemented!');
+    }
+
+    public function patchCandidateMessage(int $candidate_id, int $message_id, string $action): void {
+        throw new RuntimeException('patchCandidateMessage not implemented!');
+    }
+
+    public function getCandidateMessages(int $candidate_id): array {
+        throw new RuntimeException('getCandidateMessages not implemented!');
+    }
+
+    public function deleteCandidateProfileimage(int $candidate_id): void {
+        throw new RuntimeException('deleteCandidateProfileimage not implemented!');
+    }
+
+    public function postCandidateProfileimage(int $candidate_id, File $file): File {
+        throw new RuntimeException('postCandidateProfileimage not implemented!');
     }
 }
