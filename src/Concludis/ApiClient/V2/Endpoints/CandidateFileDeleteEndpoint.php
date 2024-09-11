@@ -12,11 +12,13 @@ class CandidateFileDeleteEndpoint extends AbstractEndpoint
     use TraitParamsEndpoint;
     public const PARAM_KEY_CANDIDATE_ID = 'candidate_id';
     public const PARAM_KEY_FILE_ID = 'file_id';
+    public const PARAM_KEY_FILE_META = 'file_meta';
 
     public function paramsDefinition(): array {
         return [
             self::PARAM_KEY_CANDIDATE_ID => ['cast' => 'int'],
             self::PARAM_KEY_FILE_ID => ['cast' => 'int'],
+            self::PARAM_KEY_FILE_META => ['cast' => 'array'],
         ];
     }
 

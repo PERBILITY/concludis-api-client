@@ -11,8 +11,6 @@ use Concludis\ApiClient\V2\Responses\ApplicationApplyPostResponse;
 use Concludis\ApiClient\V2\Responses\ApplicationDataprivacyGetResponse;
 use Concludis\ApiClient\V2\Responses\ApplicationSetupGetResponse;
 use Concludis\ApiClient\V2\Responses\CandidateAppicationsGetResponse;
-use Concludis\ApiClient\V2\Responses\CandidateFileDeleteResponse;
-use Concludis\ApiClient\V2\Responses\CandidateFileGetResponse;
 use Exception;
 
 abstract class AbstractClient {
@@ -120,10 +118,11 @@ abstract class AbstractClient {
     /**
      * @param int $candidate_id
      * @param int $file_id
+     * @param array|null $meta
      * @return void
      * @throws Exception
      */
-    abstract public function deleteCandidateFile(int $candidate_id, int $file_id): void;
+    abstract public function deleteCandidateFile(int $candidate_id, int $file_id, ?array $meta = null): void;
 
     /**
      * @param int $candidate_id
@@ -150,9 +149,8 @@ abstract class AbstractClient {
     abstract public function getCandidateHrjson(int $candidate_id): array;
 
     /**
-     * @param int $candidate_id
      * @param array $candidate The hropen candidate object as php-array
-     * @return array
+     * @return void
      * @throws Exception
      */
     abstract public function postCandidateHrjson(array $candidate): void;

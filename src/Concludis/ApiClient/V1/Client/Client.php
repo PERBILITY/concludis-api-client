@@ -312,7 +312,7 @@ class Client extends AbstractClient {
         throw new RuntimeException('fetchCandidateApplications not implemented!');
     }
 
-    public function deleteCandidateFile(int $candidate_id, int $file_id): void {
+    public function deleteCandidateFile(int $candidate_id, int $file_id, ?array $meta = null): void {
         throw new RuntimeException('deleteCandidateFile not implemented!');
     }
 

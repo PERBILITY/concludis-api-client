@@ -685,14 +685,17 @@ class Client extends AbstractClient {
     /**
      * @param int $candidate_id
      * @param int $file_id
+     * @param array|null $meta
      * @return void
-     * @throws Exception
      */
-    public function deleteCandidateFile(int $candidate_id, int $file_id): void {
+    public function deleteCandidateFile(int $candidate_id, int $file_id, ?array $meta = null): void {
 
         $endpoint = new CandidateFileDeleteEndpoint($this);
         $endpoint->addParam(CandidateFileDeleteEndpoint::PARAM_KEY_CANDIDATE_ID, $candidate_id);
         $endpoint->addParam(CandidateFileDeleteEndpoint::PARAM_KEY_FILE_ID, $file_id);
+        if(!empty($meta)) {
+            $endpoint->addParam(CandidateFileDeleteEndpoint::PARAM_KEY_FILE_META, $meta);
+        }
         $response = $endpoint->call();
 
         $err = $response->error();
