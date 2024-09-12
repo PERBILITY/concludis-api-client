@@ -23,8 +23,8 @@ class CandidateProfileimagePostResponse extends EndpointResponse {
                 'candidate_id' => (int)$endpoint->getParam(CandidateProfileimagePostEndpoint::PARAM_KEY_CANDIDATE_ID),
                 'name' => (string)($file['name'] ?? ''),
                 'mime_type' => (int)($file['mime_type'] ?? 0),
-                'local_doctype' => (int)($file['local_doctype'] ?? 0),
-                'global_doctype' => (int)($file['global_doctype'] ?? 0),
+                'local_file_type' => (int)($file['local_file_type'] ?? 0),
+                'global_file_type' => (int)($file['global_file_type'] ?? 0),
                 'size' => (int)($file['size'] ?? 0),
                 'mktime' => (int)($file['mktime'] ?? 0),
                 'checksum' => (string)($file['checksum'] ?? '')

@@ -745,7 +745,7 @@ class Client extends AbstractClient {
         $endpoint = new CandidateFilePostEndpoint($this);
         $endpoint->addParam(CandidateFilePostEndpoint::PARAM_KEY_CANDIDATE_ID, $candidate_id);
         $endpoint->addParam(CandidateFilePostEndpoint::PARAM_KEY_FILE_NAME, $file->name);
-        $endpoint->addParam(CandidateFilePostEndpoint::PARAM_KEY_FILE_TYPE, $file->mime_type);
+        $endpoint->addParam(CandidateFilePostEndpoint::PARAM_KEY_FILE_TYPE, $file->local_file_type);
         $endpoint->addParam(CandidateFilePostEndpoint::PARAM_KEY_FILE_CONTENT, $file->content);
         if(!empty($meta)) {
             $endpoint->addParam(CandidateFilePostEndpoint::PARAM_KEY_FILE_META, $meta);
