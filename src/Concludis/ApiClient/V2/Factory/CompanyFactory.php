@@ -85,7 +85,7 @@ class CompanyFactory {
                 'id' => (int)($data['industry_id'] ?? 0),
                 'name' => $data['industry_name'] ?? ''
             ]),
-
+            'private_placement' => (bool)($data['private_placement'] ?? false),
             'url_company_site' => $data['website_url'] ?? '',
             'url_career_site' => $data['career_site_url'] ?? '',
             'xing_profile_url' => $data['xing_profile_url'] ?? '',
