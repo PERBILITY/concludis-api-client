@@ -41,6 +41,11 @@ class Company {
     public ?Element $industry = null;
 
     /**
+     * @var bool
+     */
+    public bool $private_placement = false;
+
+    /**
      * @var string
      */
     public string $url_company_site = '';
@@ -238,6 +243,7 @@ class Company {
                 $this->industry = new Element($data['industry']);
             }
         }
+        $this->private_placement = (bool)($data['private_placement'] ?? false);
         if(array_key_exists('url_company_site', $data)) {
             $this->url_company_site = (string)$data['url_company_site'];
         }

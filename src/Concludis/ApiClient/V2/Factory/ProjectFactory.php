@@ -511,6 +511,7 @@ class ProjectFactory {
 //                    'id' => $data['job_company']['job_company_industry']['job_company_industry_id'],
 //                    'name' => $data['job_company']['job_company_industry']['job_company_industry_name']
 //                ]),
+                'private_placement' => (bool)($v['private_placement'] ?? false),
                 'url_logo' => $v['logo'],
                 'background_color' => $v['background_color'],
                 'headline_color' => $v['headline_color'],
