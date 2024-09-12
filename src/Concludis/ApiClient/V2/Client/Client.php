@@ -295,7 +295,7 @@ class Client extends AbstractClient {
 
                 $error = new ApiError(
                     ApiError::CODE_API_RUNTIME_ERROR,
-                    'Runtime error in response',
+                    'Runtime error in response: ' . implode('; ', (array)$json['errors']),
                     new ApiRuntimeException('Runtime error in response', ApiError::CODE_API_RUNTIME_ERROR, (array)$json['errors'])
                 );
 
