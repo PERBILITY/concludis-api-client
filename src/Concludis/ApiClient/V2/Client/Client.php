@@ -527,10 +527,19 @@ class Client extends AbstractClient {
 
             }
 
+            if($cli) {
+                CliUtil::output('purgeDeprecatedProjects...');
+            }
             $saveHandler->purgeDeprecatedProjects($source->id, $update_datetime);
 
+            if($cli) {
+                CliUtil::output('commit...');
+            }
             $pdo->commit();
 
+            if($cli) {
+                CliUtil::output('done...');
+            }
         } catch (Exception $e) {
             $pdo->rollback();
             if($cli) {
