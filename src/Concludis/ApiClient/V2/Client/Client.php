@@ -218,6 +218,12 @@ class Client extends AbstractClient {
 
 
         $ch = curl_init($_url);
+
+        $proxy = getenv('HTTPS_PROXY');
+        if(is_string($proxy) && !empty($proxy)) {
+            curl_setopt($ch, CURLOPT_PROXY, $proxy);
+        }
+
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 //        curl_setopt($ch, CURLOPT_HEADER, 1);
         curl_setopt($ch, CURLOPT_TIMEOUT, 30);
