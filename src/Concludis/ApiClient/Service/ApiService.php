@@ -108,7 +108,15 @@ class ApiService {
 
         $source->client()->pullProjects($source, new ProjectSaveHandler(), $cli);
 
+        if($cli) {
+            CliUtil::output('purgeUnused...');
+        }
+
         self::purgeUnused($source->id);
+
+        if($cli) {
+            CliUtil::output('done...');
+        }
     }
 
     /**
