@@ -88,13 +88,6 @@ class Client extends AbstractClient {
         return self::doCall($this->source->baseurl . $endpoint, $this->token, $data, $method);
     }
 
-    public function __destruct() {
-        try {
-            $this->logout();
-        } catch (Exception) {
-        }
-    }
-
     /**
      * @return void
      * @throws Exception
@@ -103,6 +96,13 @@ class Client extends AbstractClient {
         if($this->source === null) {
             return;
         }
+
+        // we do never need any logout when using static tokens
+        $static_token = (string)($this->source->options['static_token'] ?? '');
+        if(!empty($static_token)) {
+            return;
+        }
+
         if($this->token !== null) {
             $endpoint = '/de_DE/user/logout';
             $data = [];
