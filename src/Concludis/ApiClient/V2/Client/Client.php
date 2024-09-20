@@ -72,10 +72,11 @@ class Client extends AbstractClient {
     }
 
     public function __destruct() {
-        try {
-            $this->logout();
-        } catch (Exception) {
-        }
+        // api calls on __destruct may cause problems. Please call logout in higher layers
+//        try {
+//            $this->logout();
+//        } catch (Exception) {
+//        }
     }
 
     /**
