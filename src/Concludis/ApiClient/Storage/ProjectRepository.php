@@ -63,6 +63,7 @@ class ProjectRepository {
     public const ORDER_FIELD_PROJECT_ID = '`project`.`project_id`';
     public const ORDER_FIELD_PROJECT_DATE_FROM_PUBLIC = '`project`.`date_from_public`';
     public const ORDER_FIELD_PROJECT_DATE_FROM_INTERNAL = '`project`.`date_from_internal`';
+    public const ORDER_FIELD_PROJECT_PRIORITY = '`project`.`priority`';
     public const ORDER_FIELD_LOCATION_LOCALITY = '`local_location`.`locality`';
     public const ORDER_FIELD_GLOBAL_SENIORITY_NAME = '`seniority`.`name`';
     public const ORDER_FIELD_LOCAL_SENIORITY_NAME = '`local_seniority`.`name`';
@@ -2384,7 +2385,8 @@ class ProjectRepository {
             `date_from_internal` = :date_from_internal, 
             `published_internal` = :published_internal, 
             `published_public` = :published_public, 
-            `lastupdate` = :lastupdate';
+            `lastupdate` = :lastupdate,
+            `priority` = :priority';
 
             $ph = [
                 ':source_id' => $project->source_id,
@@ -2394,7 +2396,8 @@ class ProjectRepository {
                 ':date_from_internal' => $project->getDateFromInternal()?->format('Y-m-d'),
                 ':published_internal' => (int)$project->is_published_internal,
                 ':published_public' => (int)$project->is_published_public,
-                ':lastupdate' => $project->lastupdate
+                ':lastupdate' => $project->lastupdate,
+                ':priority' => $project->priority
             ];
 
             if ($pdo->insert($sql, $ph)) {
@@ -2465,7 +2468,8 @@ class ProjectRepository {
             `date_from_internal` = :date_from_internal, 
             `published_internal` = :published_internal, 
             `published_public` = :published_public, 
-            `lastupdate` = :lastupdate
+            `lastupdate` = :lastupdate, 
+            `priority` = :priority
             WHERE `source_id` = :source_id AND `project_id` = :project_id';
 
             $ph = [
@@ -2476,7 +2480,8 @@ class ProjectRepository {
                 ':date_from_internal' => $project->getDateFromInternal()?->format('Y-m-d'),
                 ':published_internal' => (int)$project->is_published_internal,
                 ':published_public' => (int)$project->is_published_public,
-                ':lastupdate' => $project->lastupdate
+                ':lastupdate' => $project->lastupdate,
+                ':priority' => $project->priority
             ];
 
             if ($pdo->update($sql, $ph)) {

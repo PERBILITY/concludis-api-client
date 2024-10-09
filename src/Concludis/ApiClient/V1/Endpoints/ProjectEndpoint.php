@@ -357,6 +357,10 @@ class ProjectEndpoint extends AbstractEndpoint {
             }
         }
 
+        if(array_key_exists('priority', $data)) {
+            $pdata['priority'] = (int)$data['priority'];
+        }
+
         $pdata['is_published_public'] = true;
         $pdata['is_published_internal'] = false;
 

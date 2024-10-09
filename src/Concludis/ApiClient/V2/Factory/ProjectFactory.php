@@ -265,6 +265,7 @@ class ProjectFactory {
         $pdata['id'] = (int)($data['id'] ?? 0);
         $pdata['locale'] = (string)$data['locale'];
         $pdata['status'] = Project::STATUS_ACTIVE; // @todo
+        $pdata['priority'] = (int)($data['priority'] ?? 0);
         $pdata['is_published_public'] = (bool)$data['public_published'];
         $pdata['is_published_internal'] = (bool)$data['internal_published'];
         $pdata['is_listed'] = (bool)$data['listed'];

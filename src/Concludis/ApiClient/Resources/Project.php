@@ -301,6 +301,8 @@ class Project {
 
     public array $extended_props = [];
 
+    public int $priority = 0;
+
     use TranslatableTrait;
 
     /**
@@ -620,6 +622,8 @@ class Project {
         if(array_key_exists('tone', $data) && is_string($data['tone'])) {
             $this->tone = $data['tone'];
         }
+
+        $this->priority = (int)($data['priority'] ?? 0);
 
     }
 

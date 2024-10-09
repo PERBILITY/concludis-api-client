@@ -239,11 +239,13 @@ CREATE TABLE IF NOT EXISTS `tbl_project`
     `published_internal` tinyint(1) unsigned NOT NULL DEFAULT '0',
     `published_public` tinyint(1) unsigned NOT NULL DEFAULT '1',
     `lastupdate` datetime         NOT NULL,
+    `priority` tinyint signed NOT NULL DEFAULT '0',
     PRIMARY KEY (`source_id`, `project_id`),
     KEY `idx_date_from_public` (`date_from_public`),
     KEY `idx_date_from_internal` (`date_from_internal`),
     KEY `idx_published_internal` (`published_internal`),
-    KEY `idx_published_public` (`published_public`)
+    KEY `idx_published_public` (`published_public`),
+    KEY `idx_priority` (`priority`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci;
