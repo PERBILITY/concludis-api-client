@@ -226,7 +226,7 @@ class Client extends AbstractClient {
 
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 //        curl_setopt($ch, CURLOPT_HEADER, 1);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 90);
 
         if ($method === 'POST') {
             curl_setopt($ch, CURLOPT_POST, 1);
@@ -483,7 +483,7 @@ class Client extends AbstractClient {
             }
 
             $k = 0;
-            $items_per_page = 25;
+            $items_per_page = 10;
             $page = 0;
             $count = -1;
 
