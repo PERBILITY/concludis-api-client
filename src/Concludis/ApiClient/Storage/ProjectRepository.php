@@ -2866,15 +2866,15 @@ class ProjectRepository {
      */
     private static function saveProjectJobadContainers(Project $project): void {
 
-        $containers = $project->getJobadContainers(false);
-        if($containers === null) {
+        $containers_new = $project->getJobadContainers(false);
+        if($containers_new === null) {
             return;
         }
 
         // add meta data to containers
         $postion_title_translations = $project->getPropTranslations('position_title');
         foreach($postion_title_translations as $locale => $position_title) {
-            $containers[] = new JobadContainer([
+            $containers_new[] = new JobadContainer([
                 'source_id' => $project->source_id,
                 'project_id' => $project->id,
                 'datafield_id' => 2147483647, // max int 32 bit
@@ -2886,22 +2886,77 @@ class ProjectRepository {
             ]);
         }
 
-        // todo: create real diff to decide if we should insert update or delete
-        //$existing_containers = self::fetchJobadContainers($project, true);
 
+        $containers_old = self::fetchJobadContainers($project, true);
 
+        $compare_old = [];
+        $indexed_old = [];
+        foreach($containers_old as $c) {
+            $key = $c->datafield_id . '::' . $c->locale;
+            $indexed_old[$key] = $c;
+            $compare_old[$key] = $c->createValueChecksum();
+        }
+
+        $compare_new = [];
+        $indexed_new = [];
+        foreach($containers_new as $c) {
+            $key = $c->datafield_id . '::' . $c->locale;
+            $indexed_new[$key] = $c;
+            $compare_new[$key] = $c->createValueChecksum();
+        }
+
+        // Keys existing in old and new
+        $common_keys = array_intersect_key($compare_old, $compare_new);
+        // Filter all items with checksum mismatch
+        $to_update_keys = array_keys(array_filter($common_keys, static function ($key) use ($compare_old, $compare_new) {
+            return $compare_old[$key] !== $compare_new[$key];
+        }, ARRAY_FILTER_USE_KEY));
+
+        $to_delete_keys = array_keys(array_diff_key($compare_old, $compare_new));
+        $to_insert_keys = array_keys(array_diff_key($compare_new, $compare_old));
 
         $pdo = PDO::getInstance();
 
-        $sql = 'DELETE FROM `'.CONCLUDIS_TABLE_PROJECT_AD_CONTAINER.'` 
-        WHERE `source_id` = :source_id AND `project_id` = :project_id';
+        foreach($to_delete_keys as $key) {
+            $container = $indexed_old[$key];
+            $sql = 'DELETE FROM `'.CONCLUDIS_TABLE_PROJECT_AD_CONTAINER.'` ' .
+                'WHERE `source_id` = :source_id AND `project_id` = :project_id ' .
+                'AND `datafield_id` = :datafield_id AND `locale` = :locale';
+            $pdo->delete($sql, [
+                ':source_id' => $container->source_id,
+                ':project_id' => $container->project_id,
+                ':datafield_id' => $container->datafield_id,
+                ':locale' => $container->locale,
+            ]);
+        }
 
-        $pdo->delete($sql, [
-            ':source_id' => $project->source_id,
-            ':project_id' => $project->id
-        ]);
+        foreach($to_update_keys as $key) {
+            $container = $indexed_new[$key];
+            $sql = 'UPDATE `'.CONCLUDIS_TABLE_PROJECT_AD_CONTAINER.'` SET 
+               `type` = :atype, 
+               `sortorder` = :sortorder, 
+               `container_type` = :container_type, 
+               `content_external` = :content_external, 
+               `content_internal` = :content_internal
+               WHERE `source_id` = :source_id AND `project_id` = :project_id
+               AND `datafield_id` = :datafield_id AND `locale` = :locale';
 
-        foreach ($containers as $container) {
+            $pdo->insert($sql, [
+                ':atype' => $container->type,
+                ':sortorder' => $container->sortorder,
+                ':container_type' => $container->container_type,
+                ':content_external' => $container->content_external,
+                ':content_internal' => $container->content_internal,
+                ':source_id' => $project->source_id,
+                ':project_id' => $project->id,
+                ':datafield_id' => $container->datafield_id,
+                ':locale' => $container->locale,
+            ]);
+
+        }
+
+        foreach($to_insert_keys as $key) {
+            $container = $indexed_new[$key];
             $sql = 'INSERT INTO `'.CONCLUDIS_TABLE_PROJECT_AD_CONTAINER.'` SET 
                                    `source_id` = :source_id, 
                                    `project_id` = :project_id, 

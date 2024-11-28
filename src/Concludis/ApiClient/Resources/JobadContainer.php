@@ -78,4 +78,8 @@ class JobadContainer {
         $this->content_internal = (string)($data['content_internal'] ?? '');
     }
 
+    public function createValueChecksum(): string {
+        return sha1($this->type . '::' . $this->container_type . '::' . $this->sortorder . '::' . sha1($this->content_external) . '::' . sha1($this->content_internal));
+    }
+
 }
