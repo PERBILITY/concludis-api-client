@@ -300,9 +300,17 @@ class ProjectRepository {
 
         $query = $this->prepareQueryParts($query_parts);
 
+        if(!empty($this->order)){
+            $order_parts = [];
+            foreach ($this->order as $k => $v) {
+                $order_parts[] = $k . ' ' . ($v ? 'ASC' : 'DESC');
+            }
+            $query['order'] = 'ORDER BY ' . implode(',', $order_parts);
+        }
+
         $pdo = PDO::getInstance();
 
-        $query_select = 'SELECT `location`.`map_data` ' .
+        $query_select = 'SELECT `location`.`map_data`, `project`.`priority` ' .
             (!empty($query['addons']) ? ",\n" . implode(" ,\n", $query['addons']) . " \n" : '') .
             ' FROM `'.CONCLUDIS_TABLE_PROJECT_LOCATION.'` `location` ' .
             'LEFT JOIN `'.CONCLUDIS_TABLE_PROJECT.'` `project` ' .
@@ -310,7 +318,8 @@ class ProjectRepository {
             (!empty($query['join']) ? "\n" . implode(" \n", $query['join']) . " \n" : '') .
             'WHERE 1 ' .
             (!empty($query['where']) ? "\n" . 'AND ' . implode(' AND ', $query['where']) . " \n" : '') .
-            'GROUP BY `location`.`source_id`, `location`.`project_id`, `location`.`location_id`  ' .
+            'GROUP BY `location`.`source_id`, `location`.`project_id`, `location`.`location_id`, `project`.`priority`   ' .
+            (!empty($query['order']) ? $query['order'] . " \n" : '') .
             (!empty($query['limit']) ? $query['limit'] . " \n" : '');
 
         $query_phs = array_merge($query['ph'], $query['ph_addons']);
@@ -319,7 +328,10 @@ class ProjectRepository {
 
         $data = [];
         foreach ($res as $d) {
-            $data[] = json_decode($d['map_data'], true, 512, JSON_THROW_ON_ERROR);
+            $data[] = [
+                'map_data' => json_decode($d['map_data'], true, 512, JSON_THROW_ON_ERROR),
+                'priority' => $d['priority']
+            ];
         }
 
         return $data;
