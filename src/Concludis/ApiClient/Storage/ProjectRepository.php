@@ -1435,16 +1435,18 @@ class ProjectRepository {
         }
 
 
-        $filter_int_pub = $this->filter[self::FILTER_TYPE_INT_PUB] ?? self::INT_PUB_PUBLIC;
+        if(array_key_exists(self::FILTER_TYPE_INT_PUB, $this->filter)){
+            $filter_int_pub = $this->filter[self::FILTER_TYPE_INT_PUB] ?? self::INT_PUB_PUBLIC;
 
-        if($filter_int_pub === self::INT_PUB_INTERNAL) {
-            $query_parts['int_pub'] = [
-                'where' => '`project`.`published_internal` = 1'
-            ];
-        } else {
-            $query_parts['int_pub'] = [
-                'where' => '`project`.`published_public` = 1'
-            ];
+            if($filter_int_pub === self::INT_PUB_INTERNAL) {
+                $query_parts['int_pub'] = [
+                    'where' => '`project`.`published_internal` = 1'
+                ];
+            } else {
+                $query_parts['int_pub'] = [
+                    'where' => '`project`.`published_public` = 1'
+                ];
+            }
         }
 
         if (array_key_exists(self::FILTER_TYPE_INDEED_ENABLED, $this->filter)) {
@@ -1572,6 +1574,8 @@ class ProjectRepository {
                 ];
             }
         }
+
+        echo '<pre>' . print_r($query_parts, true) . '</pre>';
 
         return $query_parts;
     }
