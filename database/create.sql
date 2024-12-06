@@ -236,6 +236,8 @@ CREATE TABLE IF NOT EXISTS `tbl_project`
     `data`       longtext         NOT NULL,
     `date_from_internal` DATE NULL DEFAULT NULL,
     `date_from_public`  DATE NULL DEFAULT NULL,
+    `listed` tinyint signed NOT NULL DEFAULT '1',
+    `unsolicited` tinyint signed NOT NULL DEFAULT '0',
     `published_internal` tinyint(1) unsigned NOT NULL DEFAULT '0',
     `published_public` tinyint(1) unsigned NOT NULL DEFAULT '1',
     `lastupdate` datetime         NOT NULL,
@@ -245,7 +247,9 @@ CREATE TABLE IF NOT EXISTS `tbl_project`
     KEY `idx_date_from_internal` (`date_from_internal`),
     KEY `idx_published_internal` (`published_internal`),
     KEY `idx_published_public` (`published_public`),
-    KEY `idx_priority` (`priority`)
+    KEY `idx_priority` (`priority`),
+    KEY `idx_listed` (`listed`),
+    KEY `idx_unsolicited` (`unsolicited`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci;

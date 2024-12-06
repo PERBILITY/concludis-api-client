@@ -12,12 +12,18 @@ class ProjectsGetEndpoint extends AbstractEndpoint {
 
     private const FILTER_TYPE_PAGINATION = 'pagination';
     public const FILTER_TYPE_PUBLISHED = 'published';
+    public const FILTER_TYPE_APPLICABLE = 'applicable';
     public const FILTER_TYPE_BOARDS = 'boards';
 
     public const PUBLISHED_ALL = 0;
     public const PUBLISHED_PUBLIC_OR_INTERNAL = 1;
     public const PUBLISHED_PUBLIC = 2;
     public const PUBLISHED_INTERNAL = 3;
+
+    public const APPLICABLE_ALL = 0;
+    public const APPLICABLE_PUBLIC_OR_INTERNAL = 1;
+    public const APPLICABLE_PUBLIC = 2;
+    public const APPLICABLE_INTERNAL = 3;
 
     private array $filter = [];
 
@@ -59,7 +65,6 @@ class ProjectsGetEndpoint extends AbstractEndpoint {
 
         $data = [
             'id' => $project_id,
-            'published' => self::PUBLISHED_PUBLIC_OR_INTERNAL,
             'show' => ['locations', 'jobad_structured', 'jobad_purified', 'ba_extended', 'indeed_extended', 'i18n']
         ];
 
@@ -93,6 +98,9 @@ class ProjectsGetEndpoint extends AbstractEndpoint {
         }
         if(array_key_exists(self::FILTER_TYPE_PUBLISHED, $this->filter)) {
             $data['published'] = (int)$this->filter[self::FILTER_TYPE_PUBLISHED];
+        }
+        if(array_key_exists(self::FILTER_TYPE_APPLICABLE, $this->filter)) {
+            $data['applicable'] = (int)$this->filter[self::FILTER_TYPE_APPLICABLE];
         }
         if(array_key_exists(self::FILTER_TYPE_BOARDS, $this->filter)) {
             $data['boards'] = (array)$this->filter[self::FILTER_TYPE_BOARDS];

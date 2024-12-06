@@ -487,7 +487,7 @@ class Client extends AbstractClient {
             $page = 0;
             $count = -1;
 
-            $pe->addFilter(ProjectsGetEndpoint::FILTER_TYPE_PUBLISHED, ProjectsGetEndpoint::PUBLISHED_PUBLIC_OR_INTERNAL);
+            $pe->addFilter(ProjectsGetEndpoint::FILTER_TYPE_APPLICABLE, ProjectsGetEndpoint::APPLICABLE_PUBLIC_OR_INTERNAL);
 
             if(!empty($filter_boards)) {
                 $pe->addFilter(ProjectsGetEndpoint::FILTER_TYPE_BOARDS, $filter_boards);
