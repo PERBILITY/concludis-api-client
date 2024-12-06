@@ -1575,8 +1575,6 @@ class ProjectRepository {
             }
         }
 
-        echo '<pre>' . print_r($query_parts, true) . '</pre>';
-
         return $query_parts;
     }
 
