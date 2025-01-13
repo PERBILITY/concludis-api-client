@@ -1,6 +1,6 @@
 {
   "name": "concludis/api-client",
-  "version": "1.6.4",
+  "version": "1.7.0",
   "homepage": "https://www.concludis.com/",
   "type": "library",
   "description": "API Client for Concludis Recruiting Software",
