@@ -16,4 +16,15 @@ class ApiRuntimeException extends Exception {
         $this->suberrors = $suberrors;
     }
 
+
+    public function getInnerMessage(): string {
+        $msg = '';
+        foreach($this->suberrors as $suberror) {
+            $msg .= trim($suberror['msg']) . PHP_EOL;
+        }
+        if(empty($msg)) {
+            $msg = $this->getMessage();
+        }
+        return $msg;
+    }
 }

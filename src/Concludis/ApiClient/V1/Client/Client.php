@@ -68,7 +68,7 @@ class Client extends AbstractClient {
 
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($ch, CURLOPT_HEADER, 0);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 60);
         if($method === 'POST') {
             curl_setopt($ch, CURLOPT_POST, 1);
             if( !empty($data)) {
