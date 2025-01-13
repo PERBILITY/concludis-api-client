@@ -599,10 +599,6 @@ class Project {
             $this->remotetype = $data['remotetype'];
         }
 
-        if(array_key_exists('remotetype', $data) && is_int($data['remotetype'])) {
-            $this->remotetype = $data['remotetype'];
-        }
-
         if(array_key_exists('salary', $data)) {
             if($data['salary'] instanceof Salary) {
                 $this->salary = $data['salary'];
