@@ -80,6 +80,16 @@ class Project {
     /**
      * @var bool|null
      */
+    public ?bool $is_applicable_public = null;
+
+    /**
+     * @var bool|null
+     */
+    public ?bool $is_applicable_internal = null;
+
+    /**
+     * @var bool|null
+     */
     public ?bool $is_listed = null;
 
     /**
@@ -329,6 +339,17 @@ class Project {
         }
         if(array_key_exists('is_published_internal', $data)) {
             $this->is_published_internal = (bool)$data['is_published_internal'];
+        }
+
+        if(array_key_exists('is_applicable_public', $data)) {
+            $this->is_applicable_public = (bool)$data['is_applicable_public'];
+        } elseif ($this->is_published_public !== null) {
+            $this->is_applicable_public = $this->is_published_public;
+        }
+        if(array_key_exists('is_applicable_internal', $data)) {
+            $this->is_applicable_internal = (bool)$data['is_applicable_internal'];
+        } elseif ($this->is_published_internal !== null) {
+            $this->is_applicable_internal = $this->is_published_internal;
         }
         if (array_key_exists('is_listed', $data)) {
             $this->is_listed = (bool)$data['is_listed'];

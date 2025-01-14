@@ -268,6 +268,8 @@ class ProjectFactory {
         $pdata['priority'] = (int)($data['priority'] ?? 0);
         $pdata['is_published_public'] = (bool)$data['public_published'];
         $pdata['is_published_internal'] = (bool)$data['internal_published'];
+        $pdata['is_applicable_public'] = (bool)$data['public_applicable'];
+        $pdata['is_applicable_internal'] = (bool)$data['internal_applicable'];
         $pdata['is_listed'] = (bool)$data['listed'];
         $pdata['is_apprentice'] = (bool)$data['apprentice'];
         $pdata['is_unsolicited_application'] = (bool)$data['unsolicited'];

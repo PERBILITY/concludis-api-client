@@ -436,7 +436,7 @@ class Client extends AbstractClient {
             if(!$should_delete) {
                 $p = $response->project;
 
-                if(!$p->is_published_public && !$p->is_published_internal) {
+                if(!$p->is_published_public && !$p->is_published_internal && !$p->is_applicable_public && !$p->is_applicable_internal) {
                     $should_delete = true;
                 } else if(!empty($filter_boards) && !$p->hasBoards($filter_boards)) {
                     $should_delete = true;
