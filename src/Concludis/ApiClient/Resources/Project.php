@@ -88,11 +88,6 @@ class Project {
     public ?bool $is_applicable_internal = null;
 
     /**
-     * @var bool|null
-     */
-    public ?bool $is_listed = null;
-
-    /**
      * Ausbildung
      * @var bool|null
      */
@@ -350,9 +345,6 @@ class Project {
             $this->is_applicable_internal = (bool)$data['is_applicable_internal'];
         } elseif ($this->is_published_internal !== null) {
             $this->is_applicable_internal = $this->is_published_internal;
-        }
-        if (array_key_exists('is_listed', $data)) {
-            $this->is_listed = (bool)$data['is_listed'];
         }
         if (array_key_exists('is_apprentice', $data)) {
             $this->is_apprentice = (bool)$data['is_apprentice'];
