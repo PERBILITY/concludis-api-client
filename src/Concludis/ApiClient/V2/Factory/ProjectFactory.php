@@ -699,8 +699,14 @@ class ProjectFactory {
                 }
 
                 $pdata['jobad_containers'] = array_filter($pdata['jobad_containers'], static function(JobadContainer $c) {
+
                     // try to drop empty containers
-                    $allowed_tags = ['img','a','ul','li','hr'];
+                    if($c->type === 'video') {
+                        $allowed_tags = ['iframe'];
+                    } else {
+                        $allowed_tags = ['img','a','ul','li','hr'];
+                    }
+
                     return trim(strip_tags($c->content_external, $allowed_tags)) !== ''
                         ||trim(strip_tags($c->content_internal, $allowed_tags)) !== '';
                 });
