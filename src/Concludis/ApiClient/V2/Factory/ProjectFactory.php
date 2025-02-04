@@ -268,7 +268,8 @@ class ProjectFactory {
         $pdata['priority'] = (int)($data['priority'] ?? 0);
         $pdata['is_published_public'] = (bool)$data['public_published'];
         $pdata['is_published_internal'] = (bool)$data['internal_published'];
-        $pdata['is_listed'] = (bool)$data['listed'];
+        $pdata['is_applicable_public'] = (bool)$data['public_applicable'];
+        $pdata['is_applicable_internal'] = (bool)$data['internal_applicable'];
         $pdata['is_apprentice'] = (bool)$data['apprentice'];
         $pdata['is_unsolicited_application'] = (bool)$data['unsolicited'];
 
@@ -698,8 +699,14 @@ class ProjectFactory {
                 }
 
                 $pdata['jobad_containers'] = array_filter($pdata['jobad_containers'], static function(JobadContainer $c) {
+
                     // try to drop empty containers
-                    $allowed_tags = ['img','a','ul','li','hr'];
+                    if($c->type === 'video') {
+                        $allowed_tags = ['iframe'];
+                    } else {
+                        $allowed_tags = ['img','a','ul','li','hr'];
+                    }
+
                     return trim(strip_tags($c->content_external, $allowed_tags)) !== ''
                         ||trim(strip_tags($c->content_internal, $allowed_tags)) !== '';
                 });

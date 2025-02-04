@@ -29,7 +29,6 @@ class ProjectRepository {
      * Possible values: one of the INT_PUB_* constants
      */
     public const FILTER_TYPE_INT_PUB = 'int_pub';
-    public const FILTER_TYPE_LISTED = 'listed';
     public const FILTER_TYPE_UNSOLICITED = 'unsolicited';
     public const FILTER_TYPE_KEYWORD = 'keyword';
     public const FILTER_TYPE_SENIORITY = 'seniority';
@@ -78,8 +77,6 @@ class ProjectRepository {
 
     public const INT_PUB_PUBLIC = 1;
     public const INT_PUB_INTERNAL = 2;
-
-    public const INT_IS_LISTED = 1;
 
     private array $filter = [];
     private array $order = [];
@@ -1420,12 +1417,6 @@ class ProjectRepository {
             }
         }
 
-        if(array_key_exists(self::FILTER_TYPE_LISTED, $this->filter) && (bool)$this->filter[self::FILTER_TYPE_LISTED] === true) {
-            $query_parts['listed'] = [
-                'where' => '`project`.`listed` = 1'
-            ];
-        }
-
         if(array_key_exists(self::FILTER_TYPE_UNSOLICITED, $this->filter) && (bool)$this->filter[self::FILTER_TYPE_UNSOLICITED] === true) {
             $query_parts['unsolicited'] = [
                 'where' => '`project`.`unsolicited` = 1'
@@ -2415,7 +2406,6 @@ class ProjectRepository {
             `data` = :data, 
             `date_from_public` = :date_from_public, 
             `date_from_internal` = :date_from_internal, 
-            `listed` = :listed, 
             `unsolicited` = :unsolicited, 
             `published_internal` = :published_internal, 
             `published_public` = :published_public, 
@@ -2428,7 +2418,6 @@ class ProjectRepository {
                 ':data' => json_encode($project, JSON_THROW_ON_ERROR),
                 ':date_from_public' => $project->getDateFromPublic()?->format('Y-m-d'),
                 ':date_from_internal' => $project->getDateFromInternal()?->format('Y-m-d'),
-                ':listed' => (int)$project->is_listed,
                 ':unsolicited' => (int)$project->is_unsolicited_application,
                 ':published_internal' => (int)$project->is_published_internal,
                 ':published_public' => (int)$project->is_published_public,
@@ -2502,7 +2491,6 @@ class ProjectRepository {
             `data` = :data, 
             `date_from_public` = :date_from_public, 
             `date_from_internal` = :date_from_internal,  
-            `listed` = :listed, 
             `unsolicited` = :unsolicited, 
             `published_internal` = :published_internal, 
             `published_public` = :published_public, 
@@ -2516,7 +2504,6 @@ class ProjectRepository {
                 ':data' => json_encode($project, JSON_THROW_ON_ERROR),
                 ':date_from_public' => $project->getDateFromPublic()?->format('Y-m-d'),
                 ':date_from_internal' => $project->getDateFromInternal()?->format('Y-m-d'),
-                ':listed' => (int)$project->is_listed,
                 ':unsolicited' => (int)$project->is_unsolicited_application,
                 ':published_internal' => (int)$project->is_published_internal,
                 ':published_public' => (int)$project->is_published_public,

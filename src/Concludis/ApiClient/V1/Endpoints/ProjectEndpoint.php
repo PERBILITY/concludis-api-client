@@ -364,9 +364,6 @@ class ProjectEndpoint extends AbstractEndpoint {
         $pdata['is_published_public'] = true;
         $pdata['is_published_internal'] = false;
 
-        if(array_key_exists('job_listed', $data)) {
-            $pdata['is_listed'] = (int)$data['job_listed'] === 1;
-        }
         if(array_key_exists('job_apprentice', $data)) {
             $pdata['is_apprentice'] = (int)$data['job_apprentice'] === 1;
         }
