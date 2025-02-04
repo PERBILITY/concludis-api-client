@@ -21,7 +21,7 @@ class ApplicationApplyPostResponse extends EndpointResponse {
 
     public ?int $project_id = null;
 
-    public ?DateTime $business_date = null;
+    public ?string $business_date = null;
 
     public ?int $campaign_transaction_id = null;
 
@@ -53,7 +53,7 @@ class ApplicationApplyPostResponse extends EndpointResponse {
             }
 
             if(isset($response->data['business_date']) ){
-                $this->business_date = DateUtil::parseIso8601((string)$response->data['business_date']);
+                $this->business_date = (string)$response->data['business_date'];
             }
 
             if(isset($response->data['project_id']) && (int)$response->data['project_id'] > 0){
