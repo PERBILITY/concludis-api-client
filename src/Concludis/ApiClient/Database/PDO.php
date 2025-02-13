@@ -59,7 +59,9 @@ class PDO extends \PDO {
             self::ATTR_EMULATE_PREPARES => false,
         ];
 
-        return new self($dsn, Baseconfig::$db_user, Baseconfig::$db_pass, $opt);
+        $pdo = new self($dsn, Baseconfig::$db_user, Baseconfig::$db_pass, $opt);
+        $pdo->exec("SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci");
+        return $pdo;
     }
 
     /**
