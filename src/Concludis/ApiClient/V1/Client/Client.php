@@ -48,17 +48,11 @@ class Client extends AbstractClient {
         if($method === 'GET' && !empty($data)) {
             $url .= '?' . http_build_query($data);
         }
-        $headers = array(
+        $headers = [
             'Content-Type: application/json',
             'Authorization: Basic '. base64_encode($this->source->username . ':' . $this->source->password)
-        );
+        ];
 
-    /**
-     * @param string $endpoint
-     * @param array $data
-     * @param string $method
-     * @return ApiResponse
-     */
         $ch = curl_init($url);
 
         $proxy = getenv('HTTPS_PROXY');
@@ -66,17 +60,41 @@ class Client extends AbstractClient {
             curl_setopt($ch, CURLOPT_PROXY, $proxy);
         }
 
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($ch, CURLOPT_HEADER, 0);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 60);
+
+        // max 5 seconds for connection
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+
+        // max 120 seconds for the full request
+        curl_setopt($ch, CURLOPT_TIMEOUT, 120);
+
+        // at least 10 bytes/sec
+        curl_setopt($ch, CURLOPT_LOW_SPEED_LIMIT, 10);
+
+        // at least 15 sec lower than low_speed_limit
+        curl_setopt($ch, CURLOPT_LOW_SPEED_TIME, 15);
+
         if($method === 'POST') {
             curl_setopt($ch, CURLOPT_POST, 1);
             if( !empty($data)) {
                 try {
-                    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data, JSON_THROW_ON_ERROR));
-                } catch (\JsonException) {}
+                    $jsonData = json_encode($data, JSON_THROW_ON_ERROR);
+                    $headers[] = 'Content-Length: ' . strlen($jsonData);
+                    curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonData);
+                } catch (\JsonException $e) {
+                    $error = new ApiError(
+                        ApiError::CODE_API_RUNTIME_ERROR,
+                        'Cannot encode JSON',
+                        $e
+                    );
+                    return new ApiResponse(null, $error);
+                }
+            } else {
+                $headers[] = 'Content-Length: 0';
+                curl_setopt($ch, CURLOPT_POSTFIELDS, '');
             }
         }
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
 
