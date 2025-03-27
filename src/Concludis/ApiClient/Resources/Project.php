@@ -624,7 +624,7 @@ class Project {
             $this->indeed_enabled = $data['indeed_enabled'];
         }
 
-        if(array_key_exists('indeed_extended', $data) && is_array($data['indeed_enabled'])) {
+        if(array_key_exists('indeed_extended', $data) && is_array($data['indeed_extended'])) {
             $this->indeed_extended = $data['indeed_extended'];
         }
 
