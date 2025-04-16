@@ -8,6 +8,7 @@ use Concludis\ApiClient\Config\Baseconfig;
 use Concludis\ApiClient\Database\PDO;
 use Concludis\ApiClient\Resources\Schedule;
 use Exception;
+use RuntimeException;
 
 class ScheduleRepository {
 
@@ -211,11 +212,11 @@ class ScheduleRepository {
 
     /**
      * @param array $global_ids
-     * @param int $source_id
+     * @param string $source_id
      * @return array
      * @throws Exception
      */
-    public static function fetchLocalIdsByGlobalIds(array $global_ids, int $source_id): array {
+    public static function fetchLocalIdsByGlobalIds(array $global_ids, string $source_id): array {
 
         if(empty($global_ids)) {
             return [];
@@ -236,4 +237,77 @@ class ScheduleRepository {
         ]));
     }
 
+    /**
+     * @param int $global_id
+     * @param string $source_id
+     * @param string $locale
+     * @return array
+     * @throws Exception
+     */
+    public static function fetchLocalSchedulesByGlobalIdIndexed(int $global_id, string $source_id, string $locale = 'de_DE'): array {
+
+        $sql = 'SELECT        
+        SHA1(CONCAT(`local_schedule`.`source_id` , "-", `local_schedule`.`schedule_id`)) AS `id`,
+        `local_schedule`.`schedule_id`,
+        `local_schedule`.`source_id`,
+        `local_schedule`.`global_schedule_id`,
+        COALESCE((
+            SELECT `translation` FROM `'.CONCLUDIS_TABLE_I18N.'` 
+            WHERE `model` = "local_schedule" AND `field` = "name" 
+            AND `key` = CONCAT(`local_schedule`.`source_id`, "::",`local_schedule`.`schedule_id`) 
+            AND `locale` = :ilocale
+        ), `local_schedule`.`name`) AS `name`
+        
+        
+        FROM `'.CONCLUDIS_TABLE_LOCAL_SCHEDULE.'` `local_schedule`       
+         
+        WHERE `local_schedule`.`source_id` = :source_id AND `local_schedule`.`global_schedule_id` = :global_id';
+
+        $pdo = PDO::getInstance();
+
+        $res = $pdo->select($sql, [
+            ':ilocale' => $locale,
+            ':source_id' => $source_id,
+            ':global_id' => $global_id,
+        ]);
+
+        $data = [];
+        foreach($res as $r){
+            $id = $r['id'];
+            $data[$id] = $r;
+        }
+        return $data;
+    }
+
+    /**
+     * @param int $global_id
+     * @param string $locale
+     * @return array
+     * @throws Exception
+     */
+    public static function fetchGlobalScheduleById(int $global_id, string $locale = 'de_DE'): array {
+
+        $sql = 'SELECT `global_schedule`.`global_id` AS `id`,
+        COALESCE((
+            SELECT `translation` FROM `'.CONCLUDIS_TABLE_I18N.'` 
+            WHERE `model` = "global_schedule" AND `field` = "name" 
+            AND `key` = CONCAT("",`global_schedule`.`global_id`) 
+            AND `locale` = :ilocale
+        ), `global_schedule`.`name`) AS `name`        
+        
+        FROM `'.CONCLUDIS_TABLE_GLOBAL_SCHEDULE.'` `global_schedule`      
+         
+        WHERE `global_schedule`.`global_id` = :global_id';
+
+        $pdo = PDO::getInstance();
+
+        $res = $pdo->selectOne($sql, [
+            ':ilocale' => $locale,
+            ':global_id' => $global_id,
+        ]);
+        if(!is_array($res)) {
+            throw new RuntimeException('Schedule not found');
+        }
+        return $res;
+    }
 }

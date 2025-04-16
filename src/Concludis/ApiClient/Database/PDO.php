@@ -177,6 +177,7 @@ class PDO extends \PDO {
      * @param  array  $placeholders
      * @param  callable|null  $callback
      * @return array
+     * @throws Exception
      */
     public function select(string $sql, array $placeholders = array(), ?callable $callback = null): array {
 //

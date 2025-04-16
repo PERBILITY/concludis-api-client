@@ -1953,7 +1953,8 @@ class ProjectRepository {
         return self::mergeQuantityResults(
             PDO::getInstance()->select($query_select, $query['ph']),
             Schedule::$merge_map,
-            'global_schedule_id'
+            'global_schedule_id',
+            $locale
         );
     }
 
@@ -2016,45 +2017,86 @@ class ProjectRepository {
         return self::mergeQuantityResults(
             PDO::getInstance()->select($query_select, $query['ph']),
             Schedule::$merge_map,
-            'id'
+            'id',
+            $locale
         );
     }
 
 
-    private static function mergeQuantityResults(array $data, array $merge_mapping, string $global_id_key = 'global_id'): array {
+    private static function mergeQuantityResults(array $data, array $merge_mapping, string $global_id_key = 'global_id', string $locale = 'de_DE'): array {
 
         if(empty($merge_mapping)) {
             return $data;
         }
 
         $merge_into_tmp = [];
-        $merged_data = [];
+        $tmp_data = [];
 
+        // Split $data into  $tmp_data and $merge_into_tmp depending on present in $merge_mapping
         foreach($data as $d) {
-            $global_schedule_id = $d[$global_id_key] ?? '_undefined';
+            $source_id = $d['source_id'] ?? null;
+            $global_schedule_id = $d[$global_id_key] ?? '_other';
+            $local_schedule_id = $d['id'] ?? '_other';
             if(array_key_exists($global_schedule_id, $merge_mapping)) {
                 foreach($merge_mapping[$global_schedule_id] as $merge_into_global_schedule_id) {
                     $merge_into_tmp[] = [
+                        'source_id' => $source_id,
                         'merge_from_global_id' => $global_schedule_id,
+                        'merge_from_local_id' => $local_schedule_id,
                         'merge_into_global_id' => $merge_into_global_schedule_id,
                         'cnt' => $d['cnt']
                     ];
                 }
             } else {
-                $merged_data[] = $d;
+                if(!array_key_exists($global_schedule_id, $tmp_data)) {
+                    $tmp_data[$global_schedule_id] = [];
+                }
+                $tmp_data[$global_schedule_id][$local_schedule_id] = $d;
             }
         }
 
+
         foreach($merge_into_tmp as $m) {
-            foreach($merged_data as &$d) {
-                if($m['merge_into_global_id'] === $d[$global_id_key]) {
-                    $d['cnt'] += $m['cnt'];
+            $source_id = (string)($m['source_id'] ?? '');
+            $cnt = $m['cnt'];
+            $target_global_id = $m['merge_into_global_id'];
+            $source_local_id = $m['merge_from_local_id'];
+            $source_global_id = $m['merge_from_global_id'];
+            $target_matches = $tmp_data[$target_global_id] ?? null;
+
+            // Try to fetch target schedules from db if target is not already present in $tmp_data
+            if(empty($target_matches)) {
+                $is_global = $source_local_id === $source_global_id;
+                try {
+                    if ($is_global) {
+                        $tmp_data[$target_global_id][$target_global_id] = ScheduleRepository::fetchGlobalScheduleById($target_global_id, $locale);
+                    } else {
+                        $tmp_data[$target_global_id] = ScheduleRepository::fetchLocalSchedulesByGlobalIdIndexed($target_global_id, $source_id, $locale);
+                    }
+                } catch (Exception) {
+                    continue;
                 }
+            }
+
+            // increment target counts
+            foreach($tmp_data[$target_global_id] as &$d) {
+                if(!array_key_exists('cnt', $d)) {
+                    $d['cnt'] = 0;
+                }
+                $d['cnt'] += $cnt;
             }
             unset($d);
         }
 
-        return $merged_data;
+        // flatten grouped $tmp_data into $final_data
+        $final_data = [];
+        foreach($tmp_data as $global_group) {
+            foreach($global_group as $item) {
+                $final_data[] = $item;
+            }
+        }
+
+        return $final_data;
     }
 
     /**
