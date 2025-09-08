@@ -163,6 +163,10 @@ class Project {
 
     public string $contact_custom_phone = '';
 
+    public string $contact_internal_custom_email = '';
+
+    public string $contact_internal_custom_phone = '';
+
     /**
      * @var Company|null
      */
@@ -464,6 +468,10 @@ class Project {
         $this->contact_custom_email = (string)($data['contact_custom_email'] ?? '');
 
         $this->contact_custom_phone = (string)($data['contact_custom_phone'] ?? '');
+
+        $this->contact_internal_custom_email = (string)($data['contact_internal_custom_email'] ?? '');
+
+        $this->contact_internal_custom_phone = (string)($data['contact_internal_custom_phone'] ?? '');
 
         if (array_key_exists('company', $data)) {
             if($data['company'] instanceof Company) {
