@@ -154,18 +154,22 @@ class Project {
      */
     public ?Person $contact = null;
 
+    public string $contact_custom_email = '';
+
+    public string $contact_custom_phone = '';
+
+    public bool $contact_show_from_board = false;
+
     /**
      * @var Person|null
      */
     public ?Person $contact_internal = null;
 
-    public string $contact_custom_email = '';
-
-    public string $contact_custom_phone = '';
-
     public string $contact_internal_custom_email = '';
 
     public string $contact_internal_custom_phone = '';
+
+    public bool $contact_internal_show_from_board = false;
 
     /**
      * @var Company|null
@@ -457,6 +461,13 @@ class Project {
                 $this->contact = new Person($data['contact']);
             }
         }
+
+        $this->contact_custom_email = (string)($data['contact_custom_email'] ?? '');
+
+        $this->contact_custom_phone = (string)($data['contact_custom_phone'] ?? '');
+
+        $this->contact_show_from_board = (bool)($data['contact_show_from_board'] ?? false);
+
         if (array_key_exists('contact_internal', $data)) {
             if($data['contact_internal'] instanceof Person) {
                 $this->contact_internal = $data['contact_internal'];
@@ -465,13 +476,11 @@ class Project {
             }
         }
 
-        $this->contact_custom_email = (string)($data['contact_custom_email'] ?? '');
-
-        $this->contact_custom_phone = (string)($data['contact_custom_phone'] ?? '');
-
         $this->contact_internal_custom_email = (string)($data['contact_internal_custom_email'] ?? '');
 
         $this->contact_internal_custom_phone = (string)($data['contact_internal_custom_phone'] ?? '');
+
+        $this->contact_internal_show_from_board = (bool)($data['contact_internal_show_from_board'] ?? false);
 
         if (array_key_exists('company', $data)) {
             if($data['company'] instanceof Company) {
