@@ -1467,8 +1467,49 @@ class ProjectRepository {
         if (array_key_exists(self::FILTER_TYPE_KEYWORD, $this->filter)) {
             $tmp_filter = $this->filter[self::FILTER_TYPE_KEYWORD];
 
-            if ($tmp_filter !== '') {
-                if($filter_int_pub === self::INT_PUB_INTERNAL) {
+            $use_like = false;
+            $search_string = '';
+
+            if(is_string($tmp_filter)) {
+                $search_string = $tmp_filter;
+            } elseif (is_array($tmp_filter)) {
+                $search_string = $tmp_filter['keyword'] ?? '';
+                $use_like = $tmp_filter['use_like'] ?? false;
+            }
+
+            if ($search_string !== '') {
+                if ($use_like) {
+                    $keyword_like = '%' . $search_string . '%';
+
+                    if ($filter_int_pub === self::INT_PUB_INTERNAL) {
+                        $query_parts['keyword'] = [
+                            'where' => 'EXISTS(' .
+                                '   SELECT 1 FROM `' . CONCLUDIS_TABLE_PROJECT_AD_CONTAINER . '` `ad_container` ' .
+                                '   WHERE `ad_container`.`project_id` = `project`.`project_id` ' .
+                                '   AND `ad_container`.`source_id` = `project`.`source_id` ' .
+                                '   AND (' .
+                                '       (`ad_container`.`content_internal` = "" AND `ad_container`.`content_external` LIKE :ad_container) ' .
+                                '       OR (`ad_container`.`content_internal` LIKE :ad_container2)' .
+                                '   )' .
+                                ')',
+                            'ph' => [
+                                ':ad_container' => $keyword_like,
+                                ':ad_container2' => $keyword_like
+                            ]
+                        ];
+                    } else {
+                        $query_parts['keyword'] = [
+                            'where' => 'EXISTS(' .
+                                '   SELECT 1 FROM `' . CONCLUDIS_TABLE_PROJECT_AD_CONTAINER . '` `ad_container` ' .
+                                '   WHERE `ad_container`.`project_id` = `project`.`project_id` ' .
+                                '   AND `ad_container`.`source_id` = `project`.`source_id` ' .
+                                '   AND `ad_container`.`content_external` LIKE :ad_container' .
+                                ')',
+                            'ph' => [':ad_container' => $keyword_like]
+                        ];
+                    }
+
+                } else if($filter_int_pub === self::INT_PUB_INTERNAL) {
                     $query_parts['keyword'] = [
                         'where' => 'EXISTS(' .
                             '   SELECT 1 FROM `'.CONCLUDIS_TABLE_PROJECT_AD_CONTAINER.'` `ad_container` ' .
@@ -1484,8 +1525,8 @@ class ProjectRepository {
                             '   ) ' .
                             ')',
                         'ph' => [
-                            ':ad_container' => $tmp_filter,
-                            ':ad_container2' => $tmp_filter
+                            ':ad_container' => $search_string,
+                            ':ad_container2' => $search_string
                         ]
                     ];
                 } else {
@@ -1496,7 +1537,7 @@ class ProjectRepository {
                             '   AND `ad_container`.`source_id` = `project`.`source_id` ' .
                             '   AND MATCH(`ad_container`.`content_external`) AGAINST (:ad_container)' .
                             ')',
-                        'ph' => [':ad_container' => $tmp_filter]
+                        'ph' => [':ad_container' => $search_string]
                     ];
                 }
             }
