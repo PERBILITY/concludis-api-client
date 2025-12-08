@@ -324,7 +324,7 @@ class Project {
     public function __construct(array $data = []) {
 
         self::setupTranslatable('project', ['source_id','id'], [
-            'title', 'position_title', 'teaser', 'full_markup', 'tracking_code', 'google_for_jobs_code'
+            'title', 'position_title', 'teaser', 'position_title_internal', 'teaser_internal', 'full_markup', 'tracking_code', 'google_for_jobs_code'
         ]);
 
         $this->initTranslations($data);
@@ -681,20 +681,34 @@ class Project {
     }
 
     /**
+     * @param bool $internal
      * @param string|null $locale
      * @return string
      */
-    public function getPositionTitle(?string $locale = null): string {
+    public function getPositionTitle(bool $internal, ?string $locale = null): string {
         $alocale = ($locale ?? $this->locale);
+        if($internal) {
+            $title = $this->getPropTranslated('position_title_internal', $alocale);
+            if(!empty($title)) {
+                return $title;
+            }
+        }
         return $this->getPropTranslated('position_title', $alocale);
     }
 
     /**
+     * @param bool $internal
      * @param string|null $locale
      * @return string
      */
-    public function getTeaser(?string $locale = null): string {
+    public function getTeaser(bool $internal, ?string $locale = null): string {
         $alocale = ($locale ?? $this->locale);
+        if($internal) {
+            $title = $this->getPropTranslated('teaser_internal', $alocale);
+            if(!empty($title)) {
+                return $title;
+            }
+        }
         return $this->getPropTranslated('teaser', $alocale);
     }
 
