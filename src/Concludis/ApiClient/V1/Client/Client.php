@@ -68,11 +68,9 @@ class Client extends AbstractClient {
         // max 120 seconds for the full request
         curl_setopt($ch, CURLOPT_TIMEOUT, 120);
 
-        // at least 10 bytes/sec
-        curl_setopt($ch, CURLOPT_LOW_SPEED_LIMIT, 10);
-
-        // at least 15 sec lower than low_speed_limit
-        curl_setopt($ch, CURLOPT_LOW_SPEED_TIME, 15);
+        // deactivate speed limits because the speed is 0 while processing
+        // the request on the target server
+        curl_setopt($ch, CURLOPT_LOW_SPEED_LIMIT, 0);
 
         if($method === 'POST') {
             curl_setopt($ch, CURLOPT_POST, 1);
