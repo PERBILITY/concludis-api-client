@@ -2922,8 +2922,10 @@ class ProjectRepository {
                     'coordinates' => [$location->lon, $location->lat],
                     'locationName' => $location->getDisplayName(),
                     'gpid' => $project->source_id . 'p' . $project->id,
-                    'title' => $project->getTitle(),
-                    'teaser' => strip_tags($project->getTeaser()),
+                    'title' => $project->getPositionTitle(false),
+                    'title_internal' => $project->getPositionTitle(true),
+                    'teaser' => strip_tags($project->getTeaser(false)),
+                    'teaser_internal' => strip_tags($project->getTeaser(true)),
                     'changed' => $dateFrom !== null ? $dateFrom->format('d.m.Y') : 'undefined',
                     'companyName' => $project->company->name ?? '',
                     'logo' => $company_logo
