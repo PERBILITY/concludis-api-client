@@ -173,7 +173,8 @@ trait TranslatableTrait {
     public function getPropTranslated(string $prop, string $locale): string {
         try {
             $trans = $this->getTranslations();
-            return (string)($trans[$locale][$prop] ?? $trans[$this->locale][$prop]);
+            $default = $trans[$this->locale][$prop] ?? '';
+            return (string)($trans[$locale][$prop] ?? $default);
         } catch (Exception) {
             return '';
         }
