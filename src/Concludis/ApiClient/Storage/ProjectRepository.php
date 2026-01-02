@@ -2983,18 +2983,32 @@ class ProjectRepository {
             return;
         }
 
-        // add meta data to containers
-        $postion_title_translations = $project->getPropTranslations('position_title');
-        foreach($postion_title_translations as $locale => $position_title) {
+        // Add meta data to containers
+        $translations = $project->getTranslations();
+        $locales = array_keys($translations);
+
+        // If there are no translations, fall back to the current project locale
+        if(empty($locales)) {
+            $locales = [$project->locale];
+        }
+
+        foreach($locales as $locale) {
+            $position_title = $project->getPropTranslated('position_title', (string)$locale);
+            $position_title_internal = $project->getPositionTitle(true, (string)$locale);
+
+            if($position_title === '' && $position_title_internal === '') {
+                continue;
+            }
+
             $containers_new[] = new JobadContainer([
                 'source_id' => $project->source_id,
                 'project_id' => $project->id,
                 'datafield_id' => 2147483647, // max int 32 bit
-                'locale' => $locale,
+                'locale' => (string)$locale,
                 'type' => '.position_title',
                 'container_type' => 'text',
-                'content_external' => (string)$position_title,
-                'content_internal' => ''
+                'content_external' => $position_title,
+                'content_internal' => $position_title_internal
             ]);
         }
 
