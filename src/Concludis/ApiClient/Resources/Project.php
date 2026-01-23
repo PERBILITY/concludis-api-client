@@ -267,6 +267,16 @@ class Project {
     public ?string $date_from_internal = null;
 
     /**
+     * @var string|null
+     */
+    public ?string $date_to_public = null;
+
+    /**
+     * @var string|null
+     */
+    public ?string $date_to_internal = null;
+
+    /**
      * @var string Format Y-m-d
      */
     public string $earlystartdate = '0000-00-00';
@@ -291,6 +301,10 @@ class Project {
      */
     public ?Salary $salary = null;
 
+    /**
+     * @var string
+     */
+    public string $collective_agreement = '';
 
     /**
      * @var int|null
@@ -580,12 +594,24 @@ class Project {
         if(!$this->is_published_public) {
             $this->date_from_public = null;
         }
+        if (array_key_exists('date_to_public', $data)) {
+            $this->date_to_public = empty($data['date_to_public']) ? null : (string)$data['date_to_public'];
+        }
+        if(!$this->is_published_public) {
+            $this->date_to_public = null;
+        }
 
         if (array_key_exists('date_from_internal', $data)) {
             $this->date_from_internal = empty($data['date_from_internal']) ? null : (string)$data['date_from_internal'];
         }
         if(!$this->is_published_internal) {
             $this->date_from_internal = null;
+        }
+        if (array_key_exists('date_to_internal', $data)) {
+            $this->date_to_internal = empty($data['date_to_internal']) ? null : (string)$data['date_to_internal'];
+        }
+        if(!$this->is_published_internal) {
+            $this->date_to_internal = null;
         }
 
         if (array_key_exists('earlystartdate', $data)) {
@@ -637,6 +663,10 @@ class Project {
             }
         }
 
+        if(array_key_exists('collective_agreement', $data) && is_string($data['collective_agreement'])) {
+            $this->collective_agreement = $data['collective_agreement'];
+        }
+
         if(array_key_exists('indeed_enabled', $data) && is_int($data['indeed_enabled'])) {
             $this->indeed_enabled = $data['indeed_enabled'];
         }
@@ -665,6 +695,20 @@ class Project {
             return null;
         }
         return DateUtil::parseMysqlDate($this->date_from_internal);
+    }
+
+    public function getDateToPublic(): ?DateTime {
+        if(empty($this->date_to_public)) {
+            return null;
+        }
+        return DateUtil::parseMysqlDate($this->date_to_public);
+    }
+
+    public function getDateToInternal(): ?DateTime {
+        if(empty($this->date_to_internal)) {
+            return null;
+        }
+        return DateUtil::parseMysqlDate($this->date_to_internal);
     }
 
     public function gpid(): string {

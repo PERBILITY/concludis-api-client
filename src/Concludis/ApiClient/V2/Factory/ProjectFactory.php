@@ -289,6 +289,20 @@ class ProjectFactory {
             $pdata['date_from_internal'] = $tmp->format('Y-m-d');
         }
 
+        $tmp = DateUtil::parseIso8601($data['public_end_date']);
+        if($tmp !== null) {
+            $tmp->setTime(23, 59, 59);
+            $tmp->setTimezone(new DateTimeZone(date_default_timezone_get()));
+            $pdata['date_to_public'] = $tmp->format(DATE_ATOM);
+        }
+
+        $tmp = DateUtil::parseIso8601($data['internal_end_date']);
+        if($tmp !== null) {
+            $tmp->setTime(23, 59, 59);
+            $tmp->setTimezone(new DateTimeZone(date_default_timezone_get()));
+            $pdata['date_to_internal'] = $tmp->format(DATE_ATOM);
+        }
+
         if(array_key_exists('apply_types', $data) && is_array($data['apply_types'])) {
             $pdata['apply_types'] = $data['apply_types'];
         }
