@@ -1432,13 +1432,15 @@ class ProjectRepository {
         if($filter_int_pub === self::INT_PUB_INTERNAL) {
             $query_parts['int_pub'] = [
                 'where' => '`project`.`published_internal` = 1 AND (
-                    `project`.`date_to_internal_utc` IS NULL OR `project`.`date_to_internal_utc` <= UTC_TIMESTAMP()
+                    `project`.`date_to_internal_utc` IS NULL
+                    OR `project`.`date_to_internal_utc` > UTC_TIMESTAMP()
                 )'
             ];
         } else {
             $query_parts['int_pub'] = [
                 'where' => '`project`.`published_public` = 1 AND (
-                    `project`.`date_to_public_utc` IS NULL OR `project`.`date_to_public_utc` <= UTC_TIMESTAMP()
+                    `project`.`date_to_public_utc` IS NULL
+                    OR `project`.`date_to_public_utc` > UTC_TIMESTAMP()
                 )'
             ];
         }
