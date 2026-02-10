@@ -687,28 +687,28 @@ class Project {
         if(empty($this->date_from_public)) {
             return null;
         }
-        return DateUtil::parseMysqlDate($this->date_from_public);
+        return DateUtil::parseIso8601($this->date_from_public);
     }
 
     public function getDateFromInternal(): ?DateTime {
         if(empty($this->date_from_internal)) {
             return null;
         }
-        return DateUtil::parseMysqlDate($this->date_from_internal);
+        return DateUtil::parseIso8601($this->date_from_internal);
     }
 
     public function getDateToPublic(): ?DateTime {
         if(empty($this->date_to_public)) {
             return null;
         }
-        return DateUtil::parseMysqlDate($this->date_to_public);
+        return DateUtil::parseIso8601($this->date_to_public);
     }
 
     public function getDateToInternal(): ?DateTime {
         if(empty($this->date_to_internal)) {
             return null;
         }
-        return DateUtil::parseMysqlDate($this->date_to_internal);
+        return DateUtil::parseIso8601($this->date_to_internal);
     }
 
     public function gpid(): string {
