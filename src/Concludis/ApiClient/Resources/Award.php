@@ -20,6 +20,11 @@ class Award extends Element {
      */
     public string $url = '';
 
+    /**
+     * @var string
+     */
+    public string $name = '';
+
     public function __construct(array $data = []) {
 
         parent::__construct($data);
@@ -34,6 +39,10 @@ class Award extends Element {
 
         if(array_key_exists('url', $data)) {
             $this->url = (string)$data['url'];
+        }
+
+        if(array_key_exists('name', $data)) {
+            $this->name = (string)$data['name'];
         }
 
     }
