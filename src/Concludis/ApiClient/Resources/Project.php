@@ -317,6 +317,11 @@ class Project {
     public array $indeed_extended = [];
 
     /**
+     * @var array
+     */
+    public array $hxj_extended = [];
+
+    /**
      * @var string
      */
     public string $tone = 'formal';
@@ -673,6 +678,10 @@ class Project {
 
         if(array_key_exists('indeed_extended', $data) && is_array($data['indeed_extended'])) {
             $this->indeed_extended = $data['indeed_extended'];
+        }
+
+        if(array_key_exists('hxj_extended', $data) && is_array($data['hxj_extended'])) {
+            $this->hxj_extended = $data['hxj_extended'];
         }
 
         if(array_key_exists('tone', $data) && is_string($data['tone'])) {

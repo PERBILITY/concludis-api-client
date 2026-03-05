@@ -750,7 +750,9 @@ class ProjectFactory {
             $pdata['tone'] = $data['tone'];
         }
 
-
+        if(array_key_exists('hxj_extended', $data)) {
+            $pdata['hxj_extended'] = (array)$data['hxj_extended'];
+        }
 
         if(array_key_exists('ba_position_information', $data)) {
 
