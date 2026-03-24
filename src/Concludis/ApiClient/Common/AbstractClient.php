@@ -82,6 +82,13 @@ abstract class AbstractClient {
     abstract public function pullBoards(Source $source,bool $cli): void;
 
     /**
+     * @param Source $source
+     * @param bool $cli
+     * @return void
+     */
+    abstract public function pullCompanies(Source $source,bool $cli): void;
+
+    /**
      * @param int $project_id
      * @param array $location_ids
      * @param int $source_id

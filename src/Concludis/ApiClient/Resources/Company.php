@@ -8,6 +8,9 @@
 
 namespace Concludis\ApiClient\Resources;
 
+use Concludis\ApiClient\Storage\CompanyRepository;
+use Exception;
+
 class Company {
 
     /**
@@ -335,5 +338,13 @@ class Company {
             $this->assigned_locations = (array)$data['assigned_locations'];
         }
 
+    }
+
+    /**
+     * @return bool
+     * @throws Exception
+     */
+    public function save(): bool {
+        return CompanyRepository::save($this);
     }
 }

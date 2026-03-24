@@ -10,6 +10,7 @@ use Concludis\ApiClient\V2\Responses\CompaniesGetResponse;
 
 class CompaniesGetEndpoint extends AbstractEndpoint {
 
+    private const SHOW = 'pagination';
     private const FILTER_TYPE_PAGINATION = 'pagination';
     private const FILTER_TYPE_KEYWORD = 'keyword';
     private const FILTER_TYPE_NAME = 'name';
@@ -56,7 +57,9 @@ class CompaniesGetEndpoint extends AbstractEndpoint {
 
         $endpoint = strtr($endpoint, $url_params);
 
-        $data = [];
+        $data = [
+            'show' => 'dataprivacy_statement'
+        ];
 
         if(array_key_exists(self::FILTER_TYPE_PAGINATION, $this->filter)) {
             $data['page'] = $this->filter[self::FILTER_TYPE_PAGINATION]['page'];

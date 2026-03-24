@@ -28,6 +28,17 @@ class ApiService {
      * @return void
      * @throws Exception
      */
+    public static function pullCompanies(bool $cli): void {
+        foreach(Baseconfig::$sources as $source) {
+            self::pullCompaniesFromSource($source, $cli);
+        }
+    }
+
+    /**
+     * @param bool $cli
+     * @return void
+     * @throws Exception
+     */
     public static function pullBoards(bool $cli): void {
         foreach(Baseconfig::$sources as $source) {
             self::pullBoardsFromSource($source, $cli);
@@ -75,8 +86,9 @@ class ApiService {
      * @throws Exception
      */
     private static function purgeUnused(?string $source_id = null): void {
-        CompanyRepository::purgeUnused($source_id);
-//        Unused boards should not be deleted
+//        #Unused companies should not be deleted
+//        CompanyRepository::purgeUnused($source_id);
+//        #Unused boards should not be deleted
 //        BoardRepository::purgeUnused();
         GroupRepository::purgeUnused($source_id);
         CategoryRepository::purgeUnused($source_id);
@@ -104,6 +116,8 @@ class ApiService {
             CliUtil::output('api............: ' . $source->api);
         }
 
+        $source->client()->pullCompanies($source, $cli);
+
         $source->client()->pullBoards($source, $cli);
 
         $source->client()->pullProjects($source, new ProjectSaveHandler(), $cli);
@@ -117,6 +131,25 @@ class ApiService {
         if($cli) {
             CliUtil::output('done...');
         }
+    }
+
+    /**
+     * @param Source $source
+     * @param bool $cli
+     * @return void
+     * @throws Exception
+     */
+    private static function pullCompaniesFromSource(Source $source, bool $cli): void {
+
+        if($cli) {
+            CliUtil::output('');
+            CliUtil::output('Pull companies from source...');
+            CliUtil::output('id.............: ' . $source->id);
+            CliUtil::output('baseurl........: ' . $source->baseurl);
+            CliUtil::output('api............: ' . $source->api);
+        }
+
+        $source->client()->pullCompanies($source, $cli);
     }
 
     /**
@@ -148,7 +181,7 @@ class ApiService {
 
         if($cli) {
             CliUtil::output('');
-            CliUtil::output('Fetch projects from source...');
+            CliUtil::output('Pull projects from source...');
             CliUtil::output('id.............: ' . $source->id);
             CliUtil::output('baseurl........: ' . $source->baseurl);
             CliUtil::output('api............: ' . $source->api);

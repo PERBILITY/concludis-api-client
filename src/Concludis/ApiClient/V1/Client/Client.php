@@ -307,6 +307,9 @@ class Client extends AbstractClient {
     public function pullBoards(Source $source, bool $cli): void {
         throw new RuntimeException('pullBoards not implemented!');
     }
+    public function pullCompanies(Source $source, bool $cli): void {
+        throw new RuntimeException('pullCompanies not implemented!');
+    }
 
     public function pushApplication(int $project_id, array $location_ids, int $source_id, bool $is_internal, array $candidate, array $options): ApplicationApplyPostResponse {
         throw new RuntimeException('pushApplication not implemented!');

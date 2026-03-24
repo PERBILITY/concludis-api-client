@@ -14,9 +14,11 @@ use Concludis\ApiClient\Exception\CurlException;
 use Concludis\ApiClient\Exception\HttpException;
 use Concludis\ApiClient\Exception\JsonException;
 use Concludis\ApiClient\Exception\ApiRuntimeException;
+use Concludis\ApiClient\Resources\Company;
 use Concludis\ApiClient\Resources\File;
 use Concludis\ApiClient\Resources\Project;
 use Concludis\ApiClient\Storage\BoardRepository;
+use Concludis\ApiClient\Storage\CompanyRepository;
 use Concludis\ApiClient\Util\ArrayUtil;
 use Concludis\ApiClient\Util\CliUtil;
 use Concludis\ApiClient\V2\Endpoints\ApplicationApplyPostEndpoint;
@@ -34,6 +36,7 @@ use Concludis\ApiClient\V2\Endpoints\CandidateMessagePatchEndpoint;
 use Concludis\ApiClient\V2\Endpoints\CandidateMessagesGetEndpoint;
 use Concludis\ApiClient\V2\Endpoints\CandidateProfileimageDeleteEndpoint;
 use Concludis\ApiClient\V2\Endpoints\CandidateProfileimagePostEndpoint;
+use Concludis\ApiClient\V2\Endpoints\CompaniesGetEndpoint;
 use Concludis\ApiClient\V2\Endpoints\ProjectsGetEndpoint;
 use Concludis\ApiClient\V2\Responses\ApplicationApplyPostResponse;
 use Concludis\ApiClient\V2\Responses\ApplicationDataprivacyGetResponse;
@@ -612,6 +615,82 @@ class Client extends AbstractClient {
                 $this->cliHandleException($e);
             }
         }
+    }
+
+    public function pullCompanies(Source $source, bool $cli): void {
+
+        $pdo = PDO::getInstance();
+
+        if($cli) {
+            CliUtil::output('');
+            CliUtil::output('Pulling companies...');
+        }
+        try {
+
+            $current_ids = [];
+            $pdo->beginTransaction();
+
+            $ce = new CompaniesGetEndpoint($this);
+
+            $k = 0;
+            $items_per_page = 100;
+            $page = 0;
+            $count = -1;
+
+            while($page <= 0 || ($page * $items_per_page) < $count) {
+
+                $page++;
+
+                $response = $ce
+                    ->paginate($page, $items_per_page)
+                    ->call()
+                ;
+
+                $err = $response->response()->error;
+                if($err !== null) {
+                    throw $err->exception;
+                }
+
+                $count = $response->count;
+
+                if($cli && $page === 1) {
+                    CliUtil::output('count..........: ' . $count);
+                    CliUtil::output('items-per-call.: ' . $items_per_page);
+                    CliUtil::showStatus(0, $count);
+                }
+
+                foreach($response->companies as $c) {
+
+                    /**
+                     * @var Company $c
+                     */
+
+                    if($cli) {
+                        $k++;
+                        CliUtil::showStatus($k, $count);
+                        while (ob_get_level() > 0) {
+                            ob_end_flush();
+                        }
+                        flush();
+                    }
+
+                    $c->save();
+                    $current_ids[] = $c->id;
+                }
+
+            }
+
+            CompanyRepository::purgeBySource($source->id, $current_ids);
+
+            $pdo->commit();
+
+        } catch (Exception $e) {
+            $pdo->rollback();
+            if($cli) {
+                $this->cliHandleException($e);
+            }
+        }
+
     }
 
     private function cliHandleException(Exception $e): void {

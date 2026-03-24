@@ -74,12 +74,14 @@ class CompanyFactory {
           }
          */
 
+
+
         return new Company([
             'source_id' => $source_id,
             'id' => $data['id'],
             'parent_id' => $data['parent_id'],
             'external_id' => $data['external_id'],
-            'name' => $data['name'],
+            'name' => html_entity_decode($data['name']),
             'industry' => new Element([
                 'source_id' => $source_id,
                 'id' => (int)($data['industry_id'] ?? 0),
