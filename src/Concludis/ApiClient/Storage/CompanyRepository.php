@@ -7,7 +7,6 @@ namespace Concludis\ApiClient\Storage;
 use Concludis\ApiClient\Config\Baseconfig;
 use Concludis\ApiClient\Database\PDO;
 use Concludis\ApiClient\Resources\Company;
-use Concludis\ApiClient\Resources\Element;
 use Concludis\ApiClient\Util\ArrayUtil;
 use Exception;
 
@@ -17,6 +16,7 @@ class CompanyRepository {
     public const FILTER_TYPE_SOURCE = 'source';
     public const FILTER_TYPE_ID = 'id';
     public const FILTER_TYPE_MERGE_HASH = 'merge_hash';
+    public const FILTER_TYPE_PAGINATION = 'pagination';
 
     /**
      * @param Company $company
@@ -44,13 +44,11 @@ class CompanyRepository {
         $sql = 'INSERT INTO `'.CONCLUDIS_TABLE_LOCAL_COMPANY.'` SET 
         `source_id` = :source_id, 
         `company_id` = :company_id, 
-        `name` = :name, 
         `data` = :data';
 
         $ph = [
             ':source_id' => $company->source_id,
             ':company_id' => $company->id,
-            ':name' => $company->name,
             ':data' => json_encode($company, JSON_THROW_ON_ERROR),
         ];
 
@@ -66,15 +64,12 @@ class CompanyRepository {
 
         $pdo = PDO::getInstance();
 
-        $sql = 'UPDATE `'.CONCLUDIS_TABLE_LOCAL_COMPANY.'` SET 
-        `name` = :name, 
-        `data` = :data                             
+        $sql = 'UPDATE `'.CONCLUDIS_TABLE_LOCAL_COMPANY.'` SET `data` = :data                             
         WHERE `source_id` = :source_id AND `company_id` = :company_id';
 
         $ph = [
             ':source_id' => $company->source_id,
             ':company_id' => $company->id,
-            ':name' => $company->name,
             ':data' => json_encode($company, JSON_THROW_ON_ERROR),
         ];
 
@@ -231,7 +226,7 @@ class CompanyRepository {
 
     /**
      * @param array $filters
-     * @return Element[]
+     * @return Company[]
      * @throws Exception
      */
     public static function fetch(array $filters = []): array {
@@ -328,6 +323,15 @@ class CompanyRepository {
             }
         }
 
+        if (array_key_exists(self::FILTER_TYPE_PAGINATION, $filters)) {
+            $tmp_filter = $filters[self::FILTER_TYPE_PAGINATION];
+            $limit = array_key_exists('limit', $tmp_filter) ? (int)$tmp_filter['limit'] : 0;
+            $offset = array_key_exists('offset', $tmp_filter) ? (int)$tmp_filter['offset'] : 0;
+            $query['limit'] = 'LIMIT ' . $offset . ',' . $limit;
+        }
+
+        $query['order'] = 'ORDER BY `name`';
+
         foreach ($query_parts as $v) {
             if (array_key_exists('where', $v)) {
                 $query['where'][] = $v['where'];
@@ -340,14 +344,19 @@ class CompanyRepository {
             }
         }
 
-        $sql = "SELECT * FROM `".CONCLUDIS_TABLE_LOCAL_COMPANY."` company WHERE 1" .
-            (!empty($query['where']) ? "\n" . 'AND ' . implode(' AND ', $query['where']) . " \n" : '');
+        $sql = "SELECT `source_id`, `company_id`, `data` FROM `".CONCLUDIS_TABLE_LOCAL_COMPANY."` company WHERE 1" .
+            (!empty($query['where'] ?? null) ? "\n" . 'AND ' . implode(' AND ', $query['where']) . " \n" : '') .
+            (!empty($query['order'] ?? null) ? $query['order'] . " \n" : '') .
+            (!empty($query['limit'] ?? null) ? $query['limit'] . " \n" : '');
 
 
         $res = $pdo->select($sql, $query['ph']);
 
         return array_map(static function ($v) {
-            return new Element($v);
+            $data = (array)json_decode($v['data'], true, 512, JSON_THROW_ON_ERROR);
+            $data['source_id'] = $v['source_id'];
+            $data['id'] = $v['company_id'];
+            return new Company($data);
         }, $res);
 
     }
