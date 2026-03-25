@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: tmaass
- * Date: 05.09.2018
- * Time: 21:45
- */
 
 namespace Concludis\ApiClient\Resources;
 

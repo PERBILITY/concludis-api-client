@@ -106,6 +106,34 @@ class CompanyRepository {
     }
 
     /**
+     * Fetches a company by its source ID and company ID
+     * @param string $source_id
+     * @param int $company_id
+     * @return Company|null
+     * @throws Exception
+     */
+    public static function fetchCompanyById(string $source_id, int $company_id): ?Company {
+        $pdo = PDO::getInstance();
+
+        $sql = 'SELECT `data` FROM `'.CONCLUDIS_TABLE_LOCAL_COMPANY.'` 
+        WHERE `source_id` = :source_id AND `company_id` = :company_id';
+
+        $res = $pdo->selectOne($sql, [
+            ':source_id' => $source_id,
+            ':company_id' => $company_id
+        ]);
+
+        if(!is_array($res)) {
+            return null;
+        }
+
+        $data = json_decode($res['data'], true, 512, JSON_THROW_ON_ERROR);
+        $data['source_id'] = $source_id;
+        $data['id'] = $company_id;
+        return new Company($data);
+    }
+
+    /**
      * @return void
      * @throws Exception
      */

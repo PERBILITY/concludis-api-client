@@ -2735,7 +2735,32 @@ class ProjectRepository {
             return;
         }
 
-        if (CompanyRepository::save($project->company)) {
+        $company = $project->company;
+        /**
+         * Note: $project->company does not contain the full level of detail that is available when retrieving a company directly.
+         * For this reason, the additional data that may already exist in the database must be loaded and preserved here,
+         * so that existing company master data is not overwritten.
+         */
+        $presentCompany = CompanyRepository::fetchCompanyById($project->source_id, $project->company->id);
+        if($presentCompany !== null) {
+            $company->parent_id = $presentCompany->parent_id;
+            $company->industry = $presentCompany->industry;
+            $company->edu_auth = $presentCompany->edu_auth;
+            $company->phone_number = $presentCompany->phone_number;
+            $company->invoice_email = $presentCompany->invoice_email;
+            $company->gh_contact_id = $presentCompany->gh_contact_id;
+            $company->ba_account_id = $presentCompany->ba_account_id;
+            $company->ba_contact_id = $presentCompany->ba_contact_id;
+            $company->dp_contact_id = $presentCompany->dp_contact_id;
+            $company->dp_officer_id = $presentCompany->dp_officer_id;
+            $company->dp_responsible_company_id = $presentCompany->dp_responsible_company_id;
+            $company->dp_inspecting_authority_id = $presentCompany->dp_inspecting_authority_id;
+            $company->email_signature_id = $presentCompany->email_signature_id;
+            $company->dataprivacy_statement = $presentCompany->dataprivacy_statement;
+            $company->assigned_locations = $presentCompany->assigned_locations;
+        }
+
+        if ($company->save()) {
 
             $sql = 'INSERT INTO `'.CONCLUDIS_TABLE_PROJECT_COMPANY.'` 
             SET `source_id` = :source_id, `project_id` = :project_id, `company_id` = :company_id';
