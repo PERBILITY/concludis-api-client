@@ -226,10 +226,11 @@ class CompanyRepository {
 
     /**
      * @param array $filters
+     * @param int|null $count
      * @return Company[]
      * @throws Exception
      */
-    public static function fetch(array $filters = []): array {
+    public static function fetch(array $filters, ?int &$count = null): array {
         $pdo = PDO::getInstance();
 
         $query = [
@@ -343,6 +344,18 @@ class CompanyRepository {
                 }
             }
         }
+
+        $sql_count = "SELECT COUNT(*) AS `cnt` FROM `".CONCLUDIS_TABLE_LOCAL_COMPANY."` company WHERE 1" .
+            (!empty($query['where'] ?? null) ? "\n" . 'AND ' . implode(' AND ', $query['where']) . " \n" : '');
+
+        $res_count = $pdo->selectOne($sql_count, $query['ph']);
+        if(!is_array($res_count)) {
+            $count = null;
+            return [];
+        }
+
+        $count = (int)($res_count['cnt'] ?? 0);
+
 
         $sql = "SELECT `source_id`, `company_id`, `data` FROM `".CONCLUDIS_TABLE_LOCAL_COMPANY."` company WHERE 1" .
             (!empty($query['where'] ?? null) ? "\n" . 'AND ' . implode(' AND ', $query['where']) . " \n" : '') .
