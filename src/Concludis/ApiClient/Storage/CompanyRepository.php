@@ -224,6 +224,19 @@ class CompanyRepository {
         }
     }
 
+    public static function fetchCompanyIdsBySource(string $source_id): array {
+        $pdo = PDO::getInstance();
+
+        $sql = "SELECT DISTINCT `company_id` FROM `".CONCLUDIS_TABLE_LOCAL_COMPANY."` WHERE `source_id` = :source_id";
+        $res = $pdo->select($sql, [':source_id' => $source_id]);
+
+        $data = [];
+        foreach($res as $r){
+            $data[] = $r['company_id'];
+        }
+        return $data;
+    }
+
     /**
      * @param array $filters
      * @param int|null $count
