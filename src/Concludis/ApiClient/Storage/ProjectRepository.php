@@ -1899,6 +1899,8 @@ class ProjectRepository {
 
         $query = $this->prepareQueryParts($query_parts);
 
+        $query['ph'][':group_key'] = $group_key;
+
         $query_select = 'SELECT 
         COALESCE(`local_group`.`group_id`, -1) AS `id`,
         COUNT(*) AS `cnt`, `local_group`.`name`
