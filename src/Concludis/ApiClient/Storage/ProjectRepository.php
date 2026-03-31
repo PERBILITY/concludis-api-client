@@ -1902,19 +1902,19 @@ class ProjectRepository {
         $query['ph'][':group_key'] = $group_key;
 
         $query_select = 'SELECT 
-        COALESCE(`local_group`.`group_id`, -1) AS `id`,
+        COALESCE(`local_group`.`group_id`, 0) AS `id`,
         COUNT(*) AS `cnt`, `local_group`.`name`
 
         FROM `'.CONCLUDIS_TABLE_PROJECT.'` `project`  
             
         LEFT JOIN `'.CONCLUDIS_TABLE_PROJECT_GROUP.'` `group` 
-        ON (`group`.`project_id` = `project`.`project_id` AND `group`.`source_id` = `project`.`source_id`) 
+        ON (`group`.`project_id` = `project`.`project_id` AND `group`.`source_id` = `project`.`source_id` AND `group`.`group_key` = :group_key ) 
             
         LEFT JOIN `'.CONCLUDIS_TABLE_LOCAL_GROUP.'` `local_group` 
         ON (`group`.`group_id` = `local_group`.`group_id` AND `group`.`group_key` = `local_group`.`group_key` AND `group`.`source_id` = `local_group`.`source_id`)
                     
         ' . (!empty($query['join']) ? implode(" \n", $query['join']) : '') . ' 
-        WHERE `group`.`group_key` = :group_key 
+        WHERE 1 
         ' . (!empty($query['where']) ? 'AND ' . implode(' AND ', $query['where']) : '') . '
         
         GROUP BY COALESCE(`local_group`.`group_id`, -1) 
