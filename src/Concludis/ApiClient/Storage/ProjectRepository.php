@@ -1902,7 +1902,7 @@ class ProjectRepository {
         $query['ph'][':group_key'] = $group_key;
 
         $query_select = 'SELECT 
-        COALESCE(`local_group`.`group_id`, 0) AS `id`,
+        COALESCE(`local_group`.`group_id`, NULL) AS `id`,
         COUNT(*) AS `cnt`, `local_group`.`name`
 
         FROM `'.CONCLUDIS_TABLE_PROJECT.'` `project`  
