@@ -393,7 +393,7 @@ class ProjectRepository {
         $pdo = PDO::getInstance();
 
         if($count === 0) {
-            $query_count = 'SELECT COUNT(DISTINCT CONCAT(`project`.`source_id`, "-", `project`.`project_id`, "-", COALESCE(`location`.`location_id`, 0)) ) AS `cnt`
+            $query_count = 'SELECT COUNT(DISTINCT CONCAT(`project`.`source_id`, "-", `project`.`project_id`, "-", COALESCE(`group`.`group_id`, 0)) ) AS `cnt`
                 FROM `'.CONCLUDIS_TABLE_PROJECT.'` `project` ' .
                 (!empty($query['join']) ? "\n" . implode(" \n", $query['join']) . " \n" : '') .
                 'WHERE 1 ' .
