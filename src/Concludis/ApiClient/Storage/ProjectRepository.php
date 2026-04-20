@@ -7,6 +7,7 @@ namespace Concludis\ApiClient\Storage;
 use Concludis\ApiClient\Config\Baseconfig;
 use Concludis\ApiClient\Database\PDO;
 use Concludis\ApiClient\Resources\Element;
+use Concludis\ApiClient\Resources\Group;
 use Concludis\ApiClient\Resources\JobadContainer;
 use Concludis\ApiClient\Resources\Location;
 use Concludis\ApiClient\Resources\Place;
@@ -74,6 +75,7 @@ class ProjectRepository {
     public const ORDER_FIELD_LOCAL_CLASSIFICATION_NAME = '`local_classification`.`name`';
     public const ORDER_FIELD_GLOBAL_CATEGORY_NAME = '`category`.`name`';
     public const ORDER_FIELD_LOCAL_CATEGORY_NAME = '`local_category`.`name`';
+    public const ORDER_FIELD_LOCAL_GROUP_NAME = '`local_group`.`name`';
 
     public const INT_PUB_PUBLIC = 1;
     public const INT_PUB_INTERNAL = 2;
@@ -97,6 +99,15 @@ class ProjectRepository {
 
         'group' => 'LEFT JOIN `'.CONCLUDIS_TABLE_PROJECT_GROUP.'` `group` ' .
             'ON (`group`.`project_id` = `project`.`project_id` AND `group`.`source_id` = `project`.`source_id`)',
+
+        'group1' => 'LEFT JOIN `'.CONCLUDIS_TABLE_PROJECT_GROUP.'` `group` ' .
+            'ON (`group`.`project_id` = `project`.`project_id` AND `group`.`source_id` = `project`.`source_id` AND `group`.`group_key` = 1)',
+
+        'group2' => 'LEFT JOIN `'.CONCLUDIS_TABLE_PROJECT_GROUP.'` `group` ' .
+            'ON (`group`.`project_id` = `project`.`project_id` AND `group`.`source_id` = `project`.`source_id` AND `group`.`group_key` = 2)',
+
+        'group3' => 'LEFT JOIN `'.CONCLUDIS_TABLE_PROJECT_GROUP.'` `group` ' .
+            'ON (`group`.`project_id` = `project`.`project_id` AND `group`.`source_id` = `project`.`source_id` AND `group`.`group_key` = 3)',
 
         'local_group' => 'LEFT JOIN `'.CONCLUDIS_TABLE_LOCAL_GROUP.'` `local_group` ' .
             'ON (`group`.`source_id` = `local_group`.`source_id` AND `group`.`group_id` = `local_group`.`group_id` AND `group`.`group_key` = `local_group`.`group_key`)',
@@ -333,6 +344,96 @@ class ProjectRepository {
                 'map_data' => json_decode($d['map_data'], true, 512, JSON_THROW_ON_ERROR),
                 'priority' => $d['priority']
             ];
+        }
+
+        return $data;
+    }
+
+
+    /**
+     * Fetches group-inflated projects.
+     * That means that we return a single project multiple times! One result for each assigned
+     * gloup as long as it matches the filter criteria.
+     * Be careful. The group{group-id} object is manipulated here. It holds max one group assignment in property.
+     *
+     * @param int $group_key
+     * @param int $count
+     * @return Project[]
+     * @throws Exception
+     */
+    public function fetchGroupInflated(int $group_key, int &$count = -1): array {
+
+        $query_parts = $this->createQueryParts(true);
+
+        if(!array_key_exists('group' . $group_key, self::$joins)) {
+            throw new Exception('Group ' . $group_key . ' not found');
+        }
+
+        $query_parts['group_inflation'] = [
+            'join' => ['group' . $group_key, 'local_group']
+        ];
+
+        $query = $this->prepareQueryParts($query_parts);
+
+        if (array_key_exists(self::FILTER_TYPE_PAGINATION, $this->filter)) {
+            $tmp_filter = $this->filter[self::FILTER_TYPE_PAGINATION];
+            $limit = array_key_exists('limit', $tmp_filter) ? (int)$tmp_filter['limit'] : 0;
+            $offset = array_key_exists('offset', $tmp_filter) ? (int)$tmp_filter['offset'] : 0;
+            $query['limit'] = 'LIMIT ' . $offset . ',' . $limit;
+        }
+
+        if(!empty($this->order)){
+            $order_parts = [];
+            foreach ($this->order as $k => $v) {
+                $order_parts[] = $k . ' ' . ($v ? 'ASC' : 'DESC');
+            }
+            $query['order'] = 'ORDER BY ' . implode(',', $order_parts);
+        }
+
+        $pdo = PDO::getInstance();
+
+        if($count === 0) {
+            $query_count = 'SELECT COUNT(DISTINCT CONCAT(`project`.`source_id`, "-", `project`.`project_id`, "-", COALESCE(`group`.`group_id`, 0)) ) AS `cnt`
+                FROM `'.CONCLUDIS_TABLE_PROJECT.'` `project` ' .
+                (!empty($query['join']) ? "\n" . implode(" \n", $query['join']) . " \n" : '') .
+                'WHERE 1 ' .
+                (!empty($query['where']) ? "\n" . 'AND ' . implode(' AND ', $query['where']) . " \n" : '');
+
+            $res_count = $pdo->selectOne($query_count, $query['ph']);
+
+            if($res_count !== false) {
+                $count = $res_count['cnt'];
+            }
+        }
+
+        $query_select = 'SELECT `project`.*, `group`.*' .
+            (!empty($query['addons']) ? ",\n" . implode(" ,\n", $query['addons']) . " \n" : '') .
+            ' FROM `'.CONCLUDIS_TABLE_PROJECT.'` `project` ' .
+            (!empty($query['join']) ? "\n" . implode(" \n", $query['join']) . " \n" : '') .
+            'WHERE 1 ' .
+            (!empty($query['where']) ? "\n" . 'AND ' . implode(' AND ', $query['where']) . " \n" : '') .
+//            'GROUP BY `project`.`source_id`, `project`.`project_id`, `location`.`location_id` ' .
+            (!empty($query['order']) ? $query['order'] . " \n" : '') .
+            (!empty($query['limit']) ? $query['limit'] . " \n" : '');
+
+//                 echo $query_select; exit();
+//        var_export( $query['ph']); exit();
+
+        $query_phs = array_merge($query['ph'], $query['ph_addons']);
+
+        $res = $pdo->select($query_select, $query_phs);
+
+        $data = [];
+        foreach ($res as $d) {
+
+            $group_id = $d['group_id'];
+            $project = new Project(json_decode($d['data'], true, 512, JSON_THROW_ON_ERROR));
+
+            $project->{'group' . $group_key} = array_values(array_filter($project->{'group' . $group_key}, static function(Group $g) use ($group_id) {
+                return $g->id === $group_id;
+            }));
+
+            $data[] = $project;
         }
 
         return $data;
@@ -1782,6 +1883,46 @@ class ProjectRepository {
 
         return PDO::getInstance()->select($query_select, $query['ph']);
     }
+
+    /**
+     * @param int $group_key
+     * @return array
+     * @throws Exception
+     */
+    public function fetchGroupQuantity(int $group_key): array {
+
+        $query_parts = $this->createQueryParts();
+
+        if( array_key_exists('group' . $group_key, $query_parts)) {
+            unset($query_parts['group' . $group_key]);
+        }
+
+        $query = $this->prepareQueryParts($query_parts);
+
+        $query['ph'][':group_key'] = $group_key;
+
+        $query_select = 'SELECT 
+        COALESCE(`local_group`.`group_id`, NULL) AS `id`,
+        COUNT(*) AS `cnt`, `local_group`.`name`
+
+        FROM `'.CONCLUDIS_TABLE_PROJECT.'` `project`  
+            
+        LEFT JOIN `'.CONCLUDIS_TABLE_PROJECT_GROUP.'` `group` 
+        ON (`group`.`project_id` = `project`.`project_id` AND `group`.`source_id` = `project`.`source_id` AND `group`.`group_key` = :group_key ) 
+            
+        LEFT JOIN `'.CONCLUDIS_TABLE_LOCAL_GROUP.'` `local_group` 
+        ON (`group`.`group_id` = `local_group`.`group_id` AND `group`.`group_key` = `local_group`.`group_key` AND `group`.`source_id` = `local_group`.`source_id`)
+                    
+        ' . (!empty($query['join']) ? implode(" \n", $query['join']) : '') . ' 
+        WHERE 1 
+        ' . (!empty($query['where']) ? 'AND ' . implode(' AND ', $query['where']) : '') . '
+        
+        GROUP BY COALESCE(`local_group`.`group_id`, -1) 
+        ORDER BY `cnt`, `local_group`.`name` DESC';
+
+        return PDO::getInstance()->select($query_select, $query['ph']);
+    }
+
 
     /**
      * @param int $group_key

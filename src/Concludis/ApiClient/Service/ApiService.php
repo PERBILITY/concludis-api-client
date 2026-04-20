@@ -63,6 +63,23 @@ class ApiService {
     }
 
     /**
+     * @param bool $cli
+     * @return void
+     * @throws Exception
+     */
+    public static function pullAll(bool $cli): void {
+        self::purgeDeprecatedSources();
+        foreach(Baseconfig::$sources as $source) {
+            self::pullAllFromSource($source, $cli);
+        }
+        self::purgeUnused();
+        try {
+            ProjectRepository::optimizeAdContainerTable();
+        } catch (Exception) {
+        }
+    }
+
+    /**
      * @return void
      * @throws Exception
      */
