@@ -39,7 +39,7 @@ class DateUtil {
      * @param int|null $accuracy
      * @return DateTime|null
      */
-    public static function parseIso8601($iso_8601_string, DateTimeZone $timezone = null, ?int &$accuracy = null): ?DateTime {
+    public static function parseIso8601($iso_8601_string, ?DateTimeZone $timezone = null, ?int &$accuracy = null): ?DateTime {
 
         if(empty($iso_8601_string)) {
             return null;

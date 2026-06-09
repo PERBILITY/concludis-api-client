@@ -13,7 +13,7 @@ class JsonException extends Exception {
      */
     public string $response_body;
 
-    public function __construct($message = '', $code = 0, $response_body = '', Throwable $previous = null) {
+    public function __construct($message = '', $code = 0, $response_body = '', ?Throwable $previous = null) {
         parent::__construct($message, $code, $previous);
         $this->response_body = (string)$response_body;
     }
