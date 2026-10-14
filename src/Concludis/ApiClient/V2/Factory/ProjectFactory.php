@@ -536,6 +536,7 @@ class ProjectFactory {
                 'locality' => $v['city'],
                 'country_code' => $v['country_code'],
                 'commercialregister' => $v['commercialregister'],
+                'company_email' => $v['company_email'] ?? '',
 
                 'url_company_site' => $v['company_site'],
                 'url_career_site' => $v['carreer_site'],

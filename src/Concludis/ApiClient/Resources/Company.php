@@ -163,6 +163,13 @@ class Company {
     public string $invoice_email = '';
 
     /**
+     * Company wide e-mail address (corporate domain), resolved by the ATS including its parent company fallback.
+     *
+     * @var string
+     */
+    public string $company_email = '';
+
+    /**
      * @var int
      */
     public int $gh_contact_id = 0;
@@ -299,6 +306,9 @@ class Company {
         }
         if(array_key_exists('invoice_email', $data)) {
             $this->invoice_email = (string)$data['invoice_email'];
+        }
+        if(array_key_exists('company_email', $data)) {
+            $this->company_email = (string)$data['company_email'];
         }
         if(array_key_exists('gh_contact_id', $data)) {
             $this->gh_contact_id = (int)$data['gh_contact_id'];
