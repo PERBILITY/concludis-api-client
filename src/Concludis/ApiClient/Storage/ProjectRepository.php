@@ -363,7 +363,7 @@ class ProjectRepository {
      */
     public function fetchGroupInflated(int $group_key, int &$count = -1): array {
 
-        $query_parts = $this->createQueryParts(true);
+        $query_parts = $this->createQueryParts();
 
         if(!array_key_exists('group' . $group_key, self::$joins)) {
             throw new Exception('Group ' . $group_key . ' not found');
