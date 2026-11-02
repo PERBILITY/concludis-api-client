@@ -1886,10 +1886,11 @@ class ProjectRepository {
 
     /**
      * @param int $group_key
+     * @param string $locale
      * @return array
      * @throws Exception
      */
-    public function fetchGroupQuantity(int $group_key): array {
+    public function fetchGroupQuantity(int $group_key, string $locale = 'de_DE'): array {
 
         $query_parts = $this->createQueryParts();
 
@@ -1900,10 +1901,17 @@ class ProjectRepository {
         $query = $this->prepareQueryParts($query_parts);
 
         $query['ph'][':group_key'] = $group_key;
+        $query['ph'][':ilocale'] = $locale;
 
         $query_select = 'SELECT 
         COALESCE(`local_group`.`group_id`, NULL) AS `id`,
-        COUNT(*) AS `cnt`, `local_group`.`name`
+        COUNT(*) AS `cnt`,
+        COALESCE((
+            SELECT `translation` FROM `'.CONCLUDIS_TABLE_I18N.'`
+            WHERE `model` = "local_group" AND `field` = "name"
+            AND `key` = CONCAT(`local_group`.`source_id`, "::",`local_group`.`group_id`)
+            AND `locale` = :ilocale
+        ), `local_group`.`name`) AS `name`
 
         FROM `'.CONCLUDIS_TABLE_PROJECT.'` `project`  
             
